@@ -90,10 +90,11 @@
     <div id="admin-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
             <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-                <h3 class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Novo Lançamento na DRE</h3>
+                <h3 id="modal-titulo-texto" class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Novo Lançamento na DRE</h3>
                 <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
+                <input type="hidden" id="lanc-index-editando" value="-1">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mês de Competência</label>
@@ -158,7 +159,7 @@
                 </div>
                 <div class="pt-2 flex justify-end space-x-3">
                     <button onclick="toggleAdminModal()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">Cancelar</button>
-                    <button onclick="adicionarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
+                    <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
                 </div>
             </div>
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
@@ -253,10 +254,41 @@
         function tentarAbrirAdmin() {
             let senha = prompt("Acesso restrito. Digite a senha para realizar o lançamento:");
             if (senha === "0") {
-                toggleAdminModal();
+                abrirModalNovo();
             } else if (senha !== null) {
                 alert("Senha incorreta! Apenas você pode realizar lançamentos.");
             }
+        }
+
+        function abrirModalNovo() {
+            document.getElementById('lanc-index-editando').value = "-1";
+            document.getElementById('modal-titulo-texto').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i> Novo Lançamento na DRE';
+            document.getElementById('lanc-mes').value = "01";
+            document.getElementById('lanc-ano').value = anoAtivo;
+            document.getElementById('lanc-canal').value = canalAtivo !== "CONSOLIDADO" && canalAtivo !== "CONSOLIDADO_LADO_A_LADO" ? canalAtivo : "BOEHRINGER";
+            document.getElementById('lanc-tipo').value = "receita_bruta";
+            document.getElementById('lanc-valor').value = "";
+            document.getElementById('lanc-desc').value = "";
+            toggleAdminModal();
+        }
+
+        function abrirModalEdicao(realIdx) {
+            let l = lancamentos[realIdx];
+            if (!l) return;
+            document.getElementById('lanc-index-editando').value = realIdx;
+            document.getElementById('modal-titulo-texto').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i> Editar Lançamento';
+            document.getElementById('lanc-mes').value = l.mes || "01";
+            document.getElementById('lanc-ano').value = l.ano || "2026";
+            document.getElementById('lanc-canal').value = l.canal || "BOEHRINGER";
+            document.getElementById('lanc-tipo').value = l.tipo || "receita_bruta";
+            document.getElementById('lanc-valor').value = l.valor;
+            document.getElementById('lanc-desc').value = l.desc || "";
+            
+            const modal = document.getElementById('admin-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            }
+            renderizarLancamentosRecentes();
         }
 
         function formatarMoeda(valor, isTotalizador = false) {
@@ -304,7 +336,7 @@
             renderizarLancamentosRecentes();
         }
 
-        async function adicionarLancamento() {
+        async function salvarLancamento() {
             const mes = document.getElementById('lanc-mes').value;
             const ano = document.getElementById('lanc-ano').value;
             const canal = document.getElementById('lanc-canal').value;
@@ -312,20 +344,27 @@
             let valorStr = document.getElementById('lanc-valor').value.trim().replace(',', '.');
             let valor = parseFloat(valorStr);
             const desc = document.getElementById('lanc-desc').value || "Lançamento DRE";
+            const indexEditando = parseInt(document.getElementById('lanc-index-editando').value);
 
             if (isNaN(valor) || valor <= 0) {
                 alert('Por favor, informe um valor numérico válido.');
                 return;
             }
 
-            lancamentos.push({
+            let novoObj = {
                 canal: String(canal).trim(),
                 tipo: String(tipo).trim(),
                 valor: Number(valor),
                 desc,
                 mes: String(mes),
                 ano: String(ano)
-            });
+            };
+
+            if (indexEditando >= 0 && indexEditando < lancamentos.length) {
+                lancamentos[indexEditando] = novoObj;
+            } else {
+                lancamentos.push(novoObj);
+            }
 
             await salvarDadosNaNuvem();
             document.getElementById('lanc-valor').value = '';
@@ -339,10 +378,12 @@
         }
 
         async function removerLancamento(index) {
-            lancamentos.splice(index, 1);
-            await salvarDadosNaNuvem();
-            renderizarLancamentosRecentes();
-            calcularEAtualizarDRE();
+            if (confirm("Deseja realmente excluir este lançamento?")) {
+                lancamentos.splice(index, 1);
+                await salvarDadosNaNuvem();
+                renderizarLancamentosRecentes();
+                calcularEAtualizarDRE();
+            }
         }
 
         function renderizarLancamentosRecentes() {
@@ -356,9 +397,12 @@
                 const realIdx = lancamentos.length - 1 - idx;
                 const canalObj = canais.find(c => c.id === l.canal);
                 const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-white p-2 rounded border border-slate-200';
-                div.innerHTML = `<span><strong>${canalObj?.nome || l.canal} (${l.mes}/${l.ano})</strong> - ${l.tipo}: ${formatarMoeda(l.valor)}</span>
-                                 <button onclick="removerLancamento(${realIdx})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>`;
+                div.className = 'flex justify-between items-center bg-white p-2 rounded border border-slate-200 gap-2';
+                div.innerHTML = `<span class="truncate"><strong>${canalObj?.nome || l.canal} (${l.mes}/${l.ano})</strong> - ${l.tipo}: ${formatarMoeda(l.valor)}</span>
+                                 <div class="flex items-center space-x-2 shrink-0">
+                                     <button onclick="abrirModalEdicao(${realIdx})" class="text-blue-500 hover:text-blue-700 p-1" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                                     <button onclick="removerLancamento(${realIdx})" class="text-red-500 hover:text-red-700 p-1" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                                 </div>`;
                 container.appendChild(div);
             });
         }
