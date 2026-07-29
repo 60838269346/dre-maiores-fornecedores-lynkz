@@ -7,16 +7,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-app: #111827; /* Fundo Principal */
-            --bg-card: #1f2937; /* Fundo dos Cards/Tabela */
-            --text-primary: #f9fafb; /* Texto Claro */
-            --text-secondary: #9ca3af; /* Texto Suave */
-            --accent-color: #3b82f6; /* Azul Principal */
-            --accent-hover: #60a5fa; /* Azul Hover */
-            --row-hover-bg: #374151; /* Linha Tabela Hover */
-            --border-color: #374151; /* Linha Tabela e Borda */
-            --highlight-yellow: #facc15; /* Amarelo Destaque Negativo */
-            --green-success: #10b981; /* Verde Destaque */
+            --bg-app: #111827;
+            --bg-card: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+            --row-hover-bg: #374151;
+            --border-color: #374151;
+            --highlight-yellow: #facc15;
         }
 
         body {
@@ -28,14 +27,13 @@
         }
 
         .container {
-            max-width: 95%; /* Aproveita melhor a tela larga */
+            max-width: 95%;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
 
-        /* Cabeçalho */
         header {
             display: flex;
             justify-content: space-between;
@@ -64,7 +62,6 @@
             color: var(--accent-color);
         }
 
-        /* Navegação de Canais */
         .channels-nav {
             display: flex;
             gap: 10px;
@@ -98,14 +95,12 @@
             border-color: var(--accent-color);
         }
 
-        /* Título da DRE Ativa */
         #canal-titulo {
             margin: 0;
             font-size: 1.25rem;
             font-weight: 600;
         }
 
-        /* Área Principal da Tabela */
         .table-wrapper {
             background-color: var(--bg-card);
             border-radius: 12px;
@@ -117,7 +112,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px; /* Garante espaço para as colunas */
+            min-width: 1400px;
             table-layout: fixed;
         }
 
@@ -129,7 +124,7 @@
 
         th:first-child, td:first-child {
             text-align: left;
-            width: 280px; /* Fixa a largura da coluna de contas */
+            width: 280px;
             position: sticky;
             left: 0;
             background-color: var(--bg-card);
@@ -153,7 +148,6 @@
             background-color: var(--row-hover-bg);
         }
 
-        /* Estilização das Linhas */
         .row-total {
             font-weight: 700;
             background-color: rgba(255, 255, 255, 0.05);
@@ -165,12 +159,6 @@
             font-size: 0.9rem;
         }
 
-        .ebitda-row {
-            background-color: rgba(59, 130, 246, 0.1); /* Azul suave para EBITDA */
-            border-top: 2px solid var(--accent-color);
-        }
-
-        /* Destaques de Valores Negativos */
         .neg {
             color: var(--highlight-yellow);
         }
@@ -187,13 +175,13 @@
         </header>
 
         <div class="channels-nav">
-            <button class="channel-btn active">1) BOEHRINGER</button>
-            <button class="channel-btn">2) PREMIER</button>
-            <button class="channel-btn">3) OURO FINO</button>
-            <button class="channel-btn">4) ORGANACT PET</button>
-            <button class="channel-btn">5) AVERT</button>
-            <button class="channel-btn">6) VANSIL</button>
-            <button class="channel-btn">CONSOLIDADO (TOTAL)</button>
+            <button class="channel-btn active" onclick="mudarCanal('BOEHRINGER', this)">1) BOEHRINGER</button>
+            <button class="channel-btn" onclick="mudarCanal('PREMIER', this)">2) PREMIER</button>
+            <button class="channel-btn" onclick="mudarCanal('OURO FINO', this)">3) OURO FINO</button>
+            <button class="channel-btn" onclick="mudarCanal('ORGANACT PET', this)">4) ORGANACT PET</button>
+            <button class="channel-btn" onclick="mudarCanal('AVERT', this)">5) AVERT</button>
+            <button class="channel-btn" onclick="mudarCanal('VANSIL', this)">6) VANSIL</button>
+            <button class="channel-btn" onclick="mudarCanal('CONSOLIDADO (TOTAL)', this)">CONSOLIDADO (TOTAL)</button>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -248,4 +236,31 @@
                     </tr>
                     <tr>
                         <td class="row-sub">• Gastos com Pessoal</td>
-                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,0
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr>
+                        <td class="row-sub">• Despesas Comerciais / Embalagens</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr>
+                        <td class="row-sub">• Despesas Administrativas</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr class="row-total" style="background-color: rgba(59, 130, 246, 0.15); border-top: 2px solid var(--accent-color);">
+                        <td>(=) EBITDA / Resultado Operacional</td>
+                        <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td><b>0,00</b></td><td>0,00%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function mudarCanal(nomeCanal, botaoEl) {
+            document.querySelectorAll('.channel-btn').forEach(btn => btn.classList.remove('active'));
+            botaoEl.classList.add('active');
+            document.getElementById('canal-titulo').innerText = `DRE Detalhada - ${nomeCanal} (Ano: 2026)`;
+        }
+    </script>
+</body>
+</html>
