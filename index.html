@@ -43,7 +43,7 @@
                 </button>
                 <button onclick="tentarAbrirAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
                     <i class="fa-solid fa-plus-circle"></i>
-                    <span>Novo Lançamento</span>
+                    <span>Painel de Lançamentos</span>
                 </button>
             </div>
         </div>
@@ -88,88 +88,116 @@
     </main>
 
     <div id="admin-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
-            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center">
-                <h3 id="modal-titulo-texto" class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Novo Lançamento na DRE</h3>
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
+                <h3 id="modal-titulo-texto" class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Painel de Lançamentos DRE</h3>
                 <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="p-6 space-y-4">
+            
+            <div class="p-6 space-y-4 overflow-y-auto flex-1">
                 <input type="hidden" id="lanc-index-editando" value="-1">
-                <div class="grid grid-cols-2 gap-3">
+                
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <h4 id="form-titulo-painel" class="text-xs font-bold text-slate-700 uppercase tracking-wide">Novo Lançamento</h4>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mês de Competência</label>
+                            <select id="lanc-mes" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Ano</label>
+                            <select id="lanc-ano" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                            </select>
+                        </div>
+                    </div>
+                    
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mês de Competência</label>
-                        <select id="lanc-mes" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="01">Janeiro</option>
-                            <option value="02">Fevereiro</option>
-                            <option value="03">Março</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Maio</option>
-                            <option value="06">Junho</option>
-                            <option value="07">Julho</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Setembro</option>
-                            <option value="10">Outubro</option>
-                            <option value="11">Novembro</option>
-                            <option value="12">Dezembro</option>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Selecione o Fornecedor</label>
+                        <select id="lanc-canal" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="BOEHRINGER">BOEHRINGER</option>
+                            <option value="PREMIER">PREMIER</option>
+                            <option value="OURO FINO">OURO FINO</option>
+                            <option value="ORGANACT PET">ORGANACT PET</option>
+                            <option value="AVERT">AVERT</option>
+                            <option value="VANSIL">VANSIL</option>
                         </select>
                     </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Linha na DRE</label>
+                            <select id="lanc-tipo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="receita_bruta">Receita Bruta (Vendas)</option>
+                                <option value="impostos">(-) Impostos sobre Vendas</option>
+                                <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
+                                <option value="pessoal">(-) Gastos com Pessoal</option>
+                                <option value="comercial">(-) Despesas Comerciais / Embalagens</option>
+                                <option value="fretes">(-) Frete / Entrega Cliente</option>
+                                <option value="administrativas">(-) Despesas Administrativas</option>
+                                <option value="tributarias">(-) Despesas Tributárias</option>
+                                <option value="outras_despesas">(-) Outras Despesas Operacionais</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor (R$)</label>
+                            <input type="text" id="lanc-valor" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Ano</label>
-                        <select id="lanc-ano" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="2026">2026</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descrição / Histórico</label>
+                        <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento...">
+                    </div>
+
+                    <div class="flex justify-end space-x-2 pt-1">
+                        <button id="btn-cancelar-edicao" onclick="limparFormularioEdicao()" class="hidden px-3 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100">Cancelar Edição</button>
+                        <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Selecione o Fornecedor</label>
-                    <select id="lanc-canal" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                        <option value="BOEHRINGER">BOEHRINGER</option>
-                        <option value="PREMIER">PREMIER</option>
-                        <option value="OURO FINO">OURO FINO</option>
-                        <option value="ORGANACT PET">ORGANACT PET</option>
-                        <option value="AVERT">AVERT</option>
-                        <option value="VANSIL">VANSIL</option>
-                    </select>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Linha na DRE</label>
-                        <select id="lanc-tipo" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                            <option value="receita_bruta">Receita Bruta (Vendas)</option>
-                            <option value="impostos">(-) Impostos sobre Vendas</option>
-                            <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
-                            <option value="pessoal">(-) Gastos com Pessoal</option>
-                            <option value="comercial">(-) Despesas Comerciais / Embalagens</option>
-                            <option value="fretes">(-) Frete / Entrega Cliente</option>
-                            <option value="administrativas">(-) Despesas Administrativas</option>
-                            <option value="tributarias">(-) Despesas Tributárias</option>
-                            <option value="outras_despesas">(-) Outras Despesas Operacionais</option>
-                        </select>
+
+                <div class="space-y-3">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-200 pb-2">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos por Mês</h4>
+                        <div class="flex items-center gap-2">
+                            <select id="filtro-mes-lancamentos" onchange="renderizarLancamentosRecentes()" class="border border-slate-300 rounded-lg p-1.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="TODOS">Todos os Meses</option>
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                            <button onclick="tentarLimparHistorico()" class="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition">
+                                <i class="fa-solid fa-trash-can"></i> Limpar Tudo
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor (R$)</label>
-                        <input type="text" id="lanc-valor" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
-                    </div>
+                    <div id="lista-lancamentos-recentes" class="max-h-56 overflow-y-auto space-y-1.5 text-xs text-slate-600 pr-1"></div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descrição / Histórico</label>
-                    <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento...">
-                </div>
-                <div class="pt-2 flex justify-end space-x-3">
-                    <button onclick="toggleAdminModal()" class="px-4 py-2 border border-slate-300 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-50">Cancelar</button>
-                    <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
-                </div>
-            </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos Recentes</h4>
-                    <button onclick="tentarLimparHistorico()" class="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
-                        <i class="fa-solid fa-trash-can"></i> Limpar Histórico Antigo
-                    </button>
-                </div>
-                <div id="lista-lancamentos-recentes" class="max-h-32 overflow-y-auto space-y-1 text-xs text-slate-600"></div>
             </div>
         </div>
     </div>
@@ -246,37 +274,46 @@
         async function limparHistoricoNuvem() {
             lancamentos = [];
             await salvarDadosNaNuvem();
+            limparFormularioEdicao();
             renderizarLancamentosRecentes();
             calcularEAtualizarDRE();
             alert("Histórico limpo com sucesso!");
         }
 
         function tentarAbrirAdmin() {
-            let senha = prompt("Acesso restrito. Digite a senha para realizar o lançamento:");
+            let senha = prompt("Acesso restrito. Digite a senha para abrir o painel de lançamentos:");
             if (senha === "0") {
-                abrirModalNovo();
+                abrirPainelAdmin();
             } else if (senha !== null) {
-                alert("Senha incorreta! Apenas você pode realizar lançamentos.");
+                alert("Senha incorreta! Apenas você pode gerenciar lançamentos.");
             }
         }
 
-        function abrirModalNovo() {
-            document.getElementById('lanc-index-editando').value = "-1";
-            document.getElementById('modal-titulo-texto').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i> Novo Lançamento na DRE';
-            document.getElementById('lanc-mes').value = "01";
-            document.getElementById('lanc-ano').value = anoAtivo;
-            document.getElementById('lanc-canal').value = canalAtivo !== "CONSOLIDADO" && canalAtivo !== "CONSOLIDADO_LADO_A_LADO" ? canalAtivo : "BOEHRINGER";
-            document.getElementById('lanc-tipo').value = "receita_bruta";
-            document.getElementById('lanc-valor').value = "";
-            document.getElementById('lanc-desc').value = "";
-            toggleAdminModal();
+        function abrirPainelAdmin() {
+            limparFormularioEdicao();
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            renderizarLancamentosRecentes();
         }
 
-        function abrirModalEdicao(realIdx) {
+        function limparFormularioEdicao() {
+            document.getElementById('lanc-index-editando').value = "-1";
+            document.getElementById('form-titulo-painel').innerText = "Novo Lançamento";
+            document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+            document.getElementById('lanc-valor').value = "";
+            document.getElementById('lanc-desc').value = "";
+            document.getElementById('lanc-ano').value = anoAtivo;
+            if (canalAtivo !== "CONSOLIDADO" && canalAtivo !== "CONSOLIDADO_LADO_A_LADO") {
+                document.getElementById('lanc-canal').value = canalAtivo;
+            }
+        }
+
+        function abrirEdicaoNoPainel(realIdx) {
             let l = lancamentos[realIdx];
             if (!l) return;
             document.getElementById('lanc-index-editando').value = realIdx;
-            document.getElementById('modal-titulo-texto').innerHTML = '<i class="fa-solid fa-pen-to-square mr-2"></i> Editar Lançamento';
+            document.getElementById('form-titulo-painel').innerText = "Editando Lançamento (Índice #" + realIdx + ")";
+            document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
             document.getElementById('lanc-mes').value = l.mes || "01";
             document.getElementById('lanc-ano').value = l.ano || "2026";
             document.getElementById('lanc-canal').value = l.canal || "BOEHRINGER";
@@ -284,11 +321,9 @@
             document.getElementById('lanc-valor').value = l.valor;
             document.getElementById('lanc-desc').value = l.desc || "";
             
-            const modal = document.getElementById('admin-modal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-            }
-            renderizarLancamentosRecentes();
+            // Rolar painel para o topo para ver o formulário preenchido
+            const modalBody = document.querySelector('#admin-modal .overflow-y-auto');
+            if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function formatarMoeda(valor, isTotalizador = false) {
@@ -333,7 +368,6 @@
         function toggleAdminModal() {
             const modal = document.getElementById('admin-modal');
             modal.classList.toggle('hidden');
-            renderizarLancamentosRecentes();
         }
 
         async function salvarLancamento() {
@@ -367,20 +401,22 @@
             }
 
             await salvarDadosNaNuvem();
-            document.getElementById('lanc-valor').value = '';
-            document.getElementById('lanc-desc').value = '';
+            
+            // Mantém o painel aberto permitindo incluir mais lançamentos seguidos sem reabrir/senha
+            limparFormularioEdicao();
             document.getElementById('filtro-ano').value = ano;
             anoAtivo = String(ano);
             canalAtivo = String(canal);
             renderizarBotoesCanais();
             calcularEAtualizarDRE();
-            toggleAdminModal();
+            renderizarLancamentosRecentes();
         }
 
         async function removerLancamento(index) {
             if (confirm("Deseja realmente excluir este lançamento?")) {
                 lancamentos.splice(index, 1);
                 await salvarDadosNaNuvem();
+                limparFormularioEdicao();
                 renderizarLancamentosRecentes();
                 calcularEAtualizarDRE();
             }
@@ -388,21 +424,43 @@
 
         function renderizarLancamentosRecentes() {
             const container = document.getElementById('lista-lancamentos-recentes');
+            const mesFiltro = document.getElementById('filtro-mes-lancamentos').value;
             container.innerHTML = '';
+            
             if (lancamentos.length === 0) {
-                container.innerHTML = '<p class="text-slate-400">Nenhum lançamento registrado.</p>';
+                container.innerHTML = '<p class="text-slate-400 py-2">Nenhum lançamento registrado.</p>';
                 return;
             }
+
+            let lancamentosFiltrados = [];
             lancamentos.slice().reverse().forEach((l, idx) => {
                 const realIdx = lancamentos.length - 1 - idx;
+                if (mesFiltro === "TODOS" || l.mes === mesFiltro) {
+                    lancamentosFiltrados.push({ l, realIdx });
+                }
+            });
+
+            if (lancamentosFiltrados.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 py-2">Nenhum lançamento para o mês de ${mesesNomes[mesFiltro] || mesFiltro}.</p>`;
+                return;
+            }
+
+            lancamentosFiltrados.forEach(item => {
+                const l = item.l;
+                const realIdx = item.realIdx;
                 const canalObj = canais.find(c => c.id === l.canal);
                 const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-white p-2 rounded border border-slate-200 gap-2';
-                div.innerHTML = `<span class="truncate"><strong>${canalObj?.nome || l.canal} (${l.mes}/${l.ano})</strong> - ${l.tipo}: ${formatarMoeda(l.valor)}</span>
-                                 <div class="flex items-center space-x-2 shrink-0">
-                                     <button onclick="abrirModalEdicao(${realIdx})" class="text-blue-500 hover:text-blue-700 p-1" title="Editar"><i class="fa-solid fa-pen"></i></button>
-                                     <button onclick="removerLancamento(${realIdx})" class="text-red-500 hover:text-red-700 p-1" title="Excluir"><i class="fa-solid fa-trash"></i></button>
-                                 </div>`;
+                div.className = 'flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 gap-2 shadow-xs';
+                div.innerHTML = `
+                    <div class="truncate">
+                        <span class="inline-block bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded mr-1">${l.mes}/${l.ano}</span>
+                        <strong>${canalObj?.nome || l.canal}</strong> - <span class="text-slate-500">${l.tipo}</span>: <span class="font-semibold text-slate-800">${formatarMoeda(l.valor)}</span>
+                        ${l.desc ? `<div class="text-slate-400 text-[10px] truncate">${l.desc}</div>` : ''}
+                    </div>
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                        <button onclick="abrirEdicaoNoPainel(${realIdx})" class="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="removerLancamento(${realIdx})" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 hover:bg-red-100 rounded transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
                 container.appendChild(div);
             });
         }
