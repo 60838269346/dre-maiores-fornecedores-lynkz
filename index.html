@@ -3,91 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRE por Canal - Visão por Ano, Mês a Mês e Acumulado</title>
+    <title>DRE Estratégica - Maiores Fornecedores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #3b82f6;
-            --bg-color: #f8fafc;
-            --text-color: #1e293b;
-            --border-color: #cbd5e1;
-            --highlight-bg: #eff6ff;
-            --total-bg: #e2e8f0;
+            --bg-app: #111827; /* Fundo Principal */
+            --bg-card: #1f2937; /* Fundo dos Cards/Tabela */
+            --text-primary: #f9fafb; /* Texto Claro */
+            --text-secondary: #9ca3af; /* Texto Suave */
+            --accent-color: #3b82f6; /* Azul Principal */
+            --accent-hover: #60a5fa; /* Azul Hover */
+            --row-hover-bg: #374151; /* Linha Tabela Hover */
+            --border-color: #374151; /* Linha Tabela e Borda */
+            --highlight-yellow: #facc15; /* Amarelo Destaque Negativo */
+            --green-success: #10b981; /* Verde Destaque */
         }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-primary);
             margin: 0;
-            padding: 20px;
+            padding: 24px;
         }
+
         .container {
-            max-width: 100%;
+            max-width: 95%; /* Aproveita melhor a tela larga */
             margin: 0 auto;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
         }
-        h2 {
-            color: var(--primary-color);
-            text-align: center;
+
+        /* Cabeçalho */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-card);
+            padding: 20px 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
         }
+
+        header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .company-logo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* Navegação de Canais */
         .channels-nav {
             display: flex;
             gap: 10px;
+            background-color: var(--bg-card);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             flex-wrap: wrap;
-            justify-content: center;
-            margin: 20px 0;
         }
+
         .channel-btn {
-            background-color: #e2e8f0;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            color: var(--text-color);
-            transition: 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
-        .channel-btn.active, .channel-btn:hover {
-            background-color: var(--secondary-color);
+
+        .channel-btn:hover {
+            background-color: var(--row-hover-bg);
+            color: var(--text-primary);
+        }
+
+        .channel-btn.active {
+            background-color: var(--accent-color);
             color: white;
+            border-color: var(--accent-color);
         }
+
+        /* Título da DRE Ativa */
+        #canal-titulo {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Área Principal da Tabela */
+        .table-wrapper {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 13px;
+            min-width: 1400px; /* Garante espaço para as colunas */
+            table-layout: fixed;
         }
+
         th, td {
-            border: 1px solid var(--border-color);
-            padding: 8px 10px;
+            padding: 12px 16px;
             text-align: right;
+            border-bottom: 1px solid var(--border-color);
         }
+
         th:first-child, td:first-child {
             text-align: left;
-            min-width: 250px;
+            width: 280px; /* Fixa a largura da coluna de contas */
+            position: sticky;
+            left: 0;
+            background-color: var(--bg-card);
+            z-index: 2;
+            border-right: 1px solid var(--border-color);
         }
+
         th {
-            background-color: var(--primary-color);
-            color: white;
+            background-color: var(--bg-card);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 3;
         }
+
+        tr:hover td {
+            background-color: var(--row-hover-bg);
+        }
+
+        /* Estilização das Linhas */
         .row-total {
-            background-color: var(--total-bg);
-            font-weight: bold;
+            font-weight: 700;
+            background-color: rgba(255, 255, 255, 0.05);
         }
+
         .row-sub {
-            padding-left: 20px;
-            color: #475569;
+            padding-left: 32px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .ebitda-row {
+            background-color: rgba(59, 130, 246, 0.1); /* Azul suave para EBITDA */
+            border-top: 2px solid var(--accent-color);
+        }
+
+        /* Destaques de Valores Negativos */
+        .neg {
+            color: var(--highlight-yellow);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>DRE Individualizada por Canal (Fornecedores)</h2>
-        <p style="text-align: center; color: #64748b;">Visão Anual, Mês a Mês, Análise Vertical e Acumulado</p>
+        <header>
+            <div>
+                <h2>Painel de Gestão: DRE Maiores Fornecedores</h2>
+                <p>Visão gerencial individualizada por parceiro</p>
+            </div>
+            <div class="company-logo">LYNKZ</div>
+        </header>
 
         <div class="channels-nav">
             <button class="channel-btn active">1) BOEHRINGER</button>
@@ -99,70 +196,56 @@
             <button class="channel-btn">CONSOLIDADO (TOTAL)</button>
         </div>
 
-        <h3 id="canal-titulo">DRE Detalhada - 1) BOEHRINGER (2026)</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="canal-titulo">DRE Detalhada - 1) BOEHRINGER (Ano: 2026)</h3>
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Exibindo valores em R$</div>
+        </div>
         
-        <table>
-            <thead>
-                <tr>
-                    <th>Estrutura da DRE</th>
-                    <th>Jan</th><th>A.V.</th>
-                    <th>Fev</th><th>A.V.</th>
-                    <th>Mar</th><th>A.V.</th>
-                    <th>Abr</th><th>A.V.</th>
-                    <th>Mai</th><th>A.V.</th>
-                    <th>Jun</th><th>A.V.</th>
-                    <th>Jul</th><th>A.V.</th>
-                    <th>Ago</th><th>A.V.</th>
-                    <th>Set</th><th>A.V.</th>
-                    <th>Out</th><th>A.V.</th>
-                    <th>Nov</th><th>A.V.</th>
-                    <th>Dez</th><th>A.V.</th>
-                    <th>Acumulado (2026)</th><th>A.V. Acum.</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><b>Receita Bruta Total</b></td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td><b>0,00</b></td><td>0,00%</td>
-                </tr>
-                <tr>
-                    <td>(-) Impostos sobre Vendas</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr class="row-total">
-                    <td>(=) Receita Líquida</td>
-                    <td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td>
-                </tr>
-                <tr>
-                    <td>(-) Custo das Mercadorias Vendidas (CMV)</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr class="row-total">
-                    <td>(=) Lucro Bruto</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr>
-                    <td>(-) Despesas Operacionais (SG&A Totais)</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr>
-                    <td class="row-sub">• Gastos com Pessoal</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr>
-                    <td class="row-sub">• Despesas Comerciais / Embalagens</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr>
-                    <td class="row-sub">• Despesas Administrativas</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
-                </tr>
-                <tr class="row-total" style="background-color: #cbd5e1;">
-                    <td>(=) EBITDA / Resultado Operacional</td>
-                    <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td><b>0,00</b></td><td>0,00%</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estrutura da DRE</th>
+                        <th>Jan</th><th>A.V.</th>
+                        <th>Fev</th><th>A.V.</th>
+                        <th>Mar</th><th>A.V.</th>
+                        <th>Abr</th><th>A.V.</th>
+                        <th>Mai</th><th>A.V.</th>
+                        <th>Jun</th><th>A.V.</th>
+                        <th>Jul</th><th>A.V.</th>
+                        <th>Ago</th><th>A.V.</th>
+                        <th>Set</th><th>A.V.</th>
+                        <th>Out</th><th>A.V.</th>
+                        <th>Nov</th><th>A.V.</th>
+                        <th>Dez</th><th>A.V.</th>
+                        <th>Acumulado</th><th>A.V. Acum.</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>(+) Receita Bruta Total</b></td>
+                        <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td><b>0,00</b></td><td>100,00%</td>
+                    </tr>
+                    <tr>
+                        <td>(-) Impostos sobre Vendas</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr class="row-total">
+                        <td>(=) Receita Líquida</td>
+                        <td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td><td>0,00</td><td>100,00%</td>
+                    </tr>
+                    <tr>
+                        <td>(-) Custo das Mercadorias Vendidas (CMV)</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr class="row-total">
+                        <td>(=) Lucro Bruto</td>
+                        <td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td><td>0,00</td><td>0,00%</td>
+                    </tr>
+                    <tr>
+                        <td>(-) Despesas Operacionais (SG&A)</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td>
+                    </tr>
+                    <tr>
+                        <td class="row-sub">• Gastos com Pessoal</td>
+                        <td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,00%</td><td class="neg">0,00</td><td class="neg">0,0
