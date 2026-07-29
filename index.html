@@ -162,7 +162,12 @@
                 </div>
             </div>
             <div class="px-6 py-4 bg-slate-50 border-t border-slate-100">
-                <h4 class="text-xs font-bold text-slate-500 uppercase mb-2">Lançamentos Recentes</h4>
+                <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos Recentes</h4>
+                    <button onclick="limparHistoricoNuvem()" class="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> Limpar Histórico Antigo
+                    </button>
+                </div>
                 <div id="lista-lancamentos-recentes" class="max-h-32 overflow-y-auto space-y-1 text-xs text-slate-600"></div>
             </div>
         </div>
@@ -223,6 +228,16 @@
                 });
             } catch (e) {
                 console.error("Erro ao salvar na nuvem.", e);
+            }
+        }
+
+        async function limparHistoricoNuvem() {
+            if (confirm("Deseja realmente limpar todo o histórico de lançamentos antigos da nuvem?")) {
+                lancamentos = [];
+                await salvarDadosNaNuvem();
+                renderizarLancamentosRecentes();
+                calcularEAtualizarDRE();
+                alert("Histórico limpo com sucesso!");
             }
         }
 
