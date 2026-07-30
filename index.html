@@ -602,7 +602,7 @@
                 adicionarLinhaLadoALado("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
                 adicionarLinhaLadoALado("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
                 adicionarLinhaLadoALado("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-                adicionarLinhaLadoALado("(=) Total das Despesas", dm => dm.total_desp, false, true, true);
+                adicionarLinhaLadoALado("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaLadoALado("(=) EBITDA", dm => dm.ebitda, false, true);
 
             } else {
@@ -675,7 +675,7 @@
                 adicionarLinhaMensal("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
                 adicionarLinhaMensal("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
                 adicionarLinhaMensal("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-                adicionarLinhaMensal("(=) Total das Despesas", dm => dm.total_desp, false, true, true);
+                adicionarLinhaMensal("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaMensal("(=) EBITDA", dm => dm.ebitda, false, true);
             }
         }
@@ -701,3 +701,4 @@
     </script>
 </body>
 </html>
+    
