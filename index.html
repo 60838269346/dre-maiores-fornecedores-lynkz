@@ -145,6 +145,7 @@
                                 <option value="pessoal">(-) Gastos com Pessoal</option>
                                 <option value="comercial">(-) Despesas Comerciais</option>
                                 <option value="pessoal_direta">(-) Despesas com Pessoal Direta</option>
+                                <option value="corporativas_indiretas">(-) Despesas Corporativas Indiretas</option>
                             </select>
                         </div>
                         <div>
@@ -478,7 +479,9 @@
                     comercial: 0,
                     pessoal_direta: 0,
                     total_desp: 0,
-                    ebitda: 0
+                    ebitda: 0,
+                    corporativas_indiretas: 0,
+                    ebitda_ajustado: 0
                 };
             });
 
@@ -497,6 +500,7 @@
                 dm.lucro_bruto_ajustado = dm.lucro_bruto + dm.verbas_comerciais;
                 dm.total_desp = dm.comissoes + dm.pessoal + dm.comercial + dm.pessoal_direta;
                 dm.ebitda = dm.lucro_bruto_ajustado - dm.total_desp;
+                dm.ebitda_ajustado = dm.ebitda - dm.corporativas_indiretas;
             });
 
             let acumuladoAno = {
@@ -512,7 +516,9 @@
                 comercial: 0,
                 pessoal_direta: 0,
                 total_desp: 0,
-                ebitda: 0
+                ebitda: 0,
+                corporativas_indiretas: 0,
+                ebitda_ajustado: 0
             };
 
             Object.values(dadosMes).forEach(dm => {
@@ -596,6 +602,8 @@
                 adicionarLinhaLadoALado("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
                 adicionarLinhaLadoALado("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
                 adicionarLinhaLadoALado("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaLadoALado("(=) Ebtida Ajustado", dm => dm.ebitda_ajustado, false, true);
 
             } else {
                 let theadHtml = `
@@ -667,6 +675,8 @@
                 adicionarLinhaMensal("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
                 adicionarLinhaMensal("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
                 adicionarLinhaMensal("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaMensal("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaMensal("(=) Ebtida Ajustado", dm => dm.ebitda_ajustado, false, true);
             }
         }
 
