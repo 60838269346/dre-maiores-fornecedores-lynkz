@@ -141,6 +141,7 @@
                                 <option value="impostos">(-) Impostos sobre Vendas</option>
                                 <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
                                 <option value="verbas_comerciais">(+) Verbas Comerciais</option>
+                                <option value="comissoes">(-) Comissões sobre Vendas</option>
                                 <option value="pessoal">(-) Gastos com Pessoal</option>
                                 <option value="comercial">(-) Despesas Comerciais / Embalagens</option>
                                 <option value="fretes">(-) Frete / Entrega Cliente</option>
@@ -475,6 +476,7 @@
                     lucro_bruto: 0,
                     verbas_comerciais: 0,
                     lucro_bruto_ajustado: 0,
+                    comissoes: 0,
                     pessoal: 0,
                     comercial: 0,
                     fretes: 0,
@@ -499,7 +501,7 @@
                 dm.receita_liquida = dm.receita_bruta - dm.impostos;
                 dm.lucro_bruto = dm.receita_liquida - dm.cmv;
                 dm.lucro_bruto_ajustado = dm.lucro_bruto + dm.verbas_comerciais;
-                dm.total_desp = dm.pessoal + dm.comercial + dm.fretes + dm.administrativas + dm.tributarias + dm.outras_despesas;
+                dm.total_desp = dm.comissoes + dm.pessoal + dm.comercial + dm.fretes + dm.administrativas + dm.tributarias + dm.outras_despesas;
                 dm.ebitda = dm.lucro_bruto_ajustado - dm.total_desp;
             });
 
@@ -511,6 +513,7 @@
                 lucro_bruto: 0,
                 verbas_comerciais: 0,
                 lucro_bruto_ajustado: 0,
+                comissoes: 0,
                 pessoal: 0,
                 comercial: 0,
                 fretes: 0,
@@ -597,6 +600,7 @@
                 adicionarLinhaLadoALado("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaLadoALado("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
                 adicionarLinhaLadoALado("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
+                adicionarLinhaLadoALado("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
                 adicionarLinhaLadoALado("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
                 adicionarLinhaLadoALado("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
                 adicionarLinhaLadoALado("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
@@ -670,6 +674,7 @@
                 adicionarLinhaMensal("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaMensal("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
                 adicionarLinhaMensal("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
+                adicionarLinhaMensal("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
                 adicionarLinhaMensal("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
                 adicionarLinhaMensal("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
                 adicionarLinhaMensal("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
