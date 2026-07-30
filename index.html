@@ -20,7 +20,6 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans">
-
     <header class="bg-slate-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
@@ -75,7 +74,6 @@
                     Base A.V.: Receita Líquida do Fornecedor (100%)
                 </div>
             </div>
-            
             <div class="overflow-x-auto">
                 <table id="tabela-dre-dados" class="w-full text-left border-collapse text-xs">
                     <thead>
@@ -93,13 +91,10 @@
                 <h3 id="modal-titulo-texto" class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Painel de Lançamentos DRE</h3>
                 <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            
             <div class="p-6 space-y-4 overflow-y-auto flex-1">
                 <input type="hidden" id="lanc-index-editando" value="-1">
-                
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
                     <h4 id="form-titulo-painel" class="text-xs font-bold text-slate-700 uppercase tracking-wide">Novo Lançamento</h4>
-                    
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mês de Competência</label>
@@ -127,7 +122,6 @@
                             </select>
                         </div>
                     </div>
-                    
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Selecione o Fornecedor</label>
                         <select id="lanc-canal" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
@@ -139,7 +133,6 @@
                             <option value="VANSIL">VANSIL</option>
                         </select>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Linha na DRE</label>
@@ -147,6 +140,7 @@
                                 <option value="receita_bruta">Receita Bruta (Vendas)</option>
                                 <option value="impostos">(-) Impostos sobre Vendas</option>
                                 <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
+                                <option value="verbas_comerciais">(+) Verbas Comerciais</option>
                                 <option value="pessoal">(-) Gastos com Pessoal</option>
                                 <option value="comercial">(-) Despesas Comerciais / Embalagens</option>
                                 <option value="fretes">(-) Frete / Entrega Cliente</option>
@@ -160,12 +154,10 @@
                             <input type="text" id="lanc-valor" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descrição / Histórico</label>
                         <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento...">
                     </div>
-
                     <div class="flex justify-end space-x-2 pt-1">
                         <button id="btn-cancelar-edicao" onclick="limparFormularioEdicao()" class="hidden px-3 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100">Cancelar Edição</button>
                         <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
@@ -205,7 +197,7 @@
     <script>
         const BIN_ID = "6a60f751da38895dfe805e30";
         const API_KEY = "$2a$10$2gRuysiXM85zMZ4OTG2dU.AEaN0WyPHJveZ2wy62/tqidY73EOJBS";
-        
+
         const mesesNomes = {
             "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
             "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
@@ -321,7 +313,6 @@
             document.getElementById('lanc-valor').value = l.valor;
             document.getElementById('lanc-desc').value = l.desc || "";
             
-            // Rolar painel para o topo para ver o formulário preenchido
             const modalBody = document.querySelector('#admin-modal .overflow-y-auto');
             if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -401,8 +392,6 @@
             }
 
             await salvarDadosNaNuvem();
-            
-            // Mantém o painel aberto permitindo incluir mais lançamentos seguidos sem reabrir/senha
             limparFormularioEdicao();
             document.getElementById('filtro-ano').value = ano;
             anoAtivo = String(ano);
@@ -426,7 +415,7 @@
             const container = document.getElementById('lista-lancamentos-recentes');
             const mesFiltro = document.getElementById('filtro-mes-lancamentos').value;
             container.innerHTML = '';
-            
+
             if (lancamentos.length === 0) {
                 container.innerHTML = '<p class="text-slate-400 py-2">Nenhum lançamento registrado.</p>';
                 return;
@@ -468,7 +457,6 @@
         function calcularDadosCanalParaAno(nomeCanal, ano) {
             let mesesAtivos = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
             let lancsCanalAno = [];
-            
             const fornecedoresOficiais = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT", "VANSIL"];
 
             if (nomeCanal === "CONSOLIDADO") {
@@ -480,10 +468,21 @@
             let dadosMes = {};
             mesesAtivos.forEach(mes => {
                 dadosMes[mes] = {
-                    receita_bruta: 0, impostos: 0, receita_liquida: 0,
-                    cmv: 0, lucro_bruto: 0, pessoal: 0, comercial: 0,
-                    fretes: 0, administrativas: 0, tributarias: 0,
-                    outras_despesas: 0, total_desp: 0, ebitda: 0
+                    receita_bruta: 0,
+                    impostos: 0,
+                    receita_liquida: 0,
+                    cmv: 0,
+                    lucro_bruto: 0,
+                    verbas_comerciais: 0,
+                    lucro_bruto_ajustado: 0,
+                    pessoal: 0,
+                    comercial: 0,
+                    fretes: 0,
+                    administrativas: 0,
+                    tributarias: 0,
+                    outras_despesas: 0,
+                    total_desp: 0,
+                    ebitda: 0
                 };
             });
 
@@ -499,15 +498,27 @@
                 let dm = dadosMes[m];
                 dm.receita_liquida = dm.receita_bruta - dm.impostos;
                 dm.lucro_bruto = dm.receita_liquida - dm.cmv;
+                dm.lucro_bruto_ajustado = dm.lucro_bruto + dm.verbas_comerciais;
                 dm.total_desp = dm.pessoal + dm.comercial + dm.fretes + dm.administrativas + dm.tributarias + dm.outras_despesas;
-                dm.ebitda = dm.lucro_bruto - dm.total_desp;
+                dm.ebitda = dm.lucro_bruto_ajustado - dm.total_desp;
             });
 
             let acumuladoAno = {
-                receita_bruta: 0, impostos: 0, receita_liquida: 0,
-                cmv: 0, lucro_bruto: 0, pessoal: 0, comercial: 0,
-                fretes: 0, administrativas: 0, tributarias: 0,
-                outras_despesas: 0, total_desp: 0, ebitda: 0
+                receita_bruta: 0,
+                impostos: 0,
+                receita_liquida: 0,
+                cmv: 0,
+                lucro_bruto: 0,
+                verbas_comerciais: 0,
+                lucro_bruto_ajustado: 0,
+                pessoal: 0,
+                comercial: 0,
+                fretes: 0,
+                administrativas: 0,
+                tributarias: 0,
+                outras_despesas: 0,
+                total_desp: 0,
+                ebitda: 0
             };
 
             Object.values(dadosMes).forEach(dm => {
@@ -583,100 +594,107 @@
                 adicionarLinhaLadoALado("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaLadoALado("(-) Custo das Mercadorias Vendidas (CMV)", dm => dm.cmv, true, false, true);
                 adicionarLinhaLadoALado("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
-                adicionarLinhaLadoALado("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, true, false, true);
-                adicionarLinhaLadoALado("    • Gastos com Pessoal", dm => dm.pessoal, false, false, true);
-                adicionarLinhaLadoALado("    • Despesas Comerciais / Embalagens", dm => dm.comercial, false, false, true);
-                adicionarLinhaLadoALado("    • Fretes / Entrega Cliente", dm => dm.fretes, false, false, true);
-                adicionarLinhaLadoALado("    • Despesas Administrativas", dm => dm.administrativas, false, false, true);
-                adicionarLinhaLadoALado("    • Despesas Tributárias", dm => dm.tributarias, false, false, true);
-                adicionarLinhaLadoALado("    • Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-                adicionarLinhaLadoALado("(=) EBITDA / Resultado Operacional", dm => dm.ebitda, false, true);
-                return;
-            }
+                adicionarLinhaLadoALado("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaLadoALado("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaLadoALado("(-) Gastos com Pessoal", dm => dm.pessoal, true, false, true);
+                adicionarLinhaLadoALado("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
+                adicionarLinhaLadoALado("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
+                adicionarLinhaLadoALado("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
+                adicionarLinhaLadoALado("(=) Total das Despesas", dm => dm.total_desp, false, true, true);
+                adicionarLinhaLadoALado("(=) EBITDA", dm => dm.ebitda, false, true);
 
-            let resCanal = calcularDadosCanalParaAno(canalAtivo, anoAtivo);
-            let dadosMes = resCanal.dadosMes;
-            let acumuladoAno = resCanal.acumuladoAno;
-            let mesesAtivos = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+            } else {
+                let theadHtml = `
+                    <th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Jan</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Fev</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Mar</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Abr</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Mai</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Jun</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Jul</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Ago</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Set</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Out</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Nov</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-2 text-right font-bold bg-slate-100">Dez</th><th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.%</th>
+                    <th class="py-3 px-3 text-right font-bold bg-slate-200 border-l border-slate-300">Acumulado</th><th class="py-3 px-2 text-right font-bold bg-slate-200">A.V.%</th>
+                `;
+                theadTr.innerHTML = theadHtml;
 
-            let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
-            mesesAtivos.forEach(mes => {
-                theadHtml += `<th class="py-3 px-2 text-right">${mesesNomes[mes].substring(0,3)}</th><th class="py-3 px-2 text-right">A.V.</th>`;
-            });
-            theadHtml += `<th class="py-3 px-3 text-right bg-slate-200/60">Acumulado (${anoAtivo})</th><th class="py-3 px-3 text-right bg-slate-200/60">A.V. Acum.</th>`;
-            theadTr.innerHTML = theadHtml;
+                let dadosCalculados = calcularDadosCanalParaAno(canalAtivo, anoAtivo);
+                let dadosMes = dadosCalculados.dadosMes;
+                let acumuladoAno = dadosCalculados.acumuladoAno;
+                let mesesAtivos = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 
-            function adicionarLinha(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
-                let tr = document.createElement('tr');
-                if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
-                else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
-                else tr.className = 'hover:bg-slate-50/80 transition';
+                function adicionarLinhaMensal(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                    let tr = document.createElement('tr');
+                    if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
+                    else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
+                    else tr.className = 'hover:bg-slate-50/80 transition';
 
-                let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
-                mesesAtivos.forEach(mes => {
-                    let dm = dadosMes[mes];
-                    let val = seletorValor(dm);
-                    let baseAV = dm.receita_liquida !== 0 ? dm.receita_liquida : 1;
-                    let av = (val / baseAV) * 100;
-                    let valExibicao = forcarParenteses && val > 0 ? -val : val;
+                    let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
+                    mesesAtivos.forEach(mes => {
+                        let dm = dadosMes[mes];
+                        let val = seletorValor(dm);
+                        let baseAV = dm.receita_liquida !== 0 ? dm.receita_liquida : 1;
+                        let av = (val / baseAV) * 100;
+                        let valExibicao = forcarParenteses && val > 0 ? -val : val;
+
+                        html += `
+                            <td class="py-2.5 px-2 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                            <td class="py-2.5 px-2 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                        `;
+                    });
+
+                    let valAcum = seletorValor(acumuladoAno);
+                    let baseAcumAV = acumuladoAno.receita_liquida !== 0 ? acumuladoAno.receita_liquida : 1;
+                    let avAcum = (valAcum / baseAcumAV) * 100;
+                    let valAcumExibicao = forcarParenteses && valAcum > 0 ? -valAcum : valAcum;
 
                     html += `
-                        <td class="py-2.5 px-2 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
-                        <td class="py-2.5 px-2 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                        <td class="py-2.5 px-3 text-right font-bold border-l border-slate-300 bg-slate-50/50">${formatarMoeda(valAcumExibicao, true)}</td>
+                        <td class="py-2.5 px-2 text-right text-slate-500 font-bold bg-slate-50/50">${formatarPercentual(avAcum, true)}</td>
                     `;
-                });
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                }
 
-                let valAcum = seletorValor(acumuladoAno);
-                let baseAcumAV = acumuladoAno.receita_liquida !== 0 ? acumuladoAno.receita_liquida : 1;
-                let avAcum = (valAcum / baseAcumAV) * 100;
-                let valAcumExibicao = forcarParenteses && valAcum > 0 ? -valAcum : valAcum;
-
-                html += `
-                    <td class="py-2.5 px-3 text-right bg-slate-50">${formatarMoeda(valAcumExibicao, true)}</td>
-                    <td class="py-2.5 px-3 text-right text-slate-600 bg-slate-50">${formatarPercentual(avAcum, true)}</td>
-                `;
-                tr.innerHTML = html;
-                tbody.appendChild(tr);
+                adicionarLinhaMensal("Receita Bruta Total", dm => dm.receita_bruta, true, false);
+                adicionarLinhaMensal("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaMensal("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaMensal("(-) Custo das Mercadorias Vendidas (CMV)", dm => dm.cmv, true, false, true);
+                adicionarLinhaMensal("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaMensal("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaMensal("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaMensal("(-) Gastos com Pessoal", dm => dm.pessoal, true, false, true);
+                adicionarLinhaMensal("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
+                adicionarLinhaMensal("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
+                adicionarLinhaMensal("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
+                adicionarLinhaMensal("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
+                adicionarLinhaMensal("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
+                adicionarLinhaMensal("(=) Total das Despesas", dm => dm.total_desp, false, true, true);
+                adicionarLinhaMensal("(=) EBITDA", dm => dm.ebitda, false, true);
             }
+        }
 
-            adicionarLinha("Receita Bruta Total", dm => dm.receita_bruta, true, false);
-            adicionarLinha("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
-            adicionarLinha("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
-            adicionarLinha("(-) Custo das Mercadorias Vendidas (CMV)", dm => dm.cmv, true, false, true);
-            adicionarLinha("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
-            adicionarLinha("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, true, false, true);
-            adicionarLinha("    • Gastos com Pessoal", dm => dm.pessoal, false, false, true);
-            adicionarLinha("    • Despesas Comerciais / Embalagens", dm => dm.comercial, false, false, true);
-            adicionarLinha("    • Fretes / Entrega Cliente", dm => dm.fretes, false, false, true);
-            adicionarLinha("    • Despesas Administrativas", dm => dm.administrativas, false, false, true);
-            adicionarLinha("    • Despesas Tributárias", dm => dm.tributarias, false, false, true);
-            adicionarLinha("    • Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-            adicionarLinha("(=) EBITDA / Resultado Operacional", dm => dm.ebitda, false, true);
+        function exportarExcel() {
+            let tabela = document.getElementById("tabela-dre-dados");
+            let html = tabela.outerHTML.replace(/ /g, '%20');
+            let blob = new Blob(['\ufeff' + decodeURIComponent(html)], { type: 'application/vnd.ms-excel' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = `DRE_${canalAtivo}_${anoAtivo}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         function exportarPDF() {
             window.print();
-        }
-
-        function exportarExcel() {
-            const tabela = document.getElementById("tabela-dre-dados");
-            let csv = [];
-            for (let i = 0; i < tabela.rows.length; i++) {
-                let row = [], cols = tabela.rows[i].querySelectorAll("td, th");
-                for (let j = 0; j < cols.length; j++) {
-                    let text = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, "").replace(/(\s\s)/gm, " ");
-                    row.push('"' + text + '"');
-                }
-                csv.push(row.join(";"));
-            }
-            let csvFile = new Blob(["\uFEFF" + csv.join("\n")], { type: "text/csv;charset=utf-8;" });
-            let downloadLink = document.createElement("a");
-            downloadLink.download = `DRE_${canalAtivo}_${anoAtivo}.csv`;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
         }
 
         carregarDadosDaNuvem();
