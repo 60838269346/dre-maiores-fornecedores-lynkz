@@ -596,13 +596,13 @@
                 adicionarLinhaLadoALado("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
                 adicionarLinhaLadoALado("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaLadoALado("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaLadoALado("(-) Gastos com Pessoal", dm => dm.pessoal, true, false, true);
                 adicionarLinhaLadoALado("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
                 adicionarLinhaLadoALado("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
                 adicionarLinhaLadoALado("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
                 adicionarLinhaLadoALado("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
                 adicionarLinhaLadoALado("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-                adicionarLinhaLadoALado("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaLadoALado("(=) EBITDA", dm => dm.ebitda, false, true);
 
             } else {
@@ -669,13 +669,13 @@
                 adicionarLinhaMensal("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
                 adicionarLinhaMensal("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaMensal("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaMensal("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaMensal("(-) Gastos com Pessoal", dm => dm.pessoal, true, false, true);
                 adicionarLinhaMensal("(-) Desp. Comerciais / Embalagens", dm => dm.comercial, false, false, true);
                 adicionarLinhaMensal("(-) Frete / Entrega Cliente", dm => dm.fretes, false, false, true);
                 adicionarLinhaMensal("(-) Despesas Administrativas", dm => dm.administrativas, false, false, true);
                 adicionarLinhaMensal("(-) Despesas Tributárias", dm => dm.tributarias, false, false, true);
                 adicionarLinhaMensal("(-) Outras Despesas Operacionais", dm => dm.outras_despesas, false, false, true);
-                adicionarLinhaMensal("(-) Despesas Operacionais (SG&A Totais)", dm => dm.total_desp, false, true, true);
                 adicionarLinhaMensal("(=) EBITDA", dm => dm.ebitda, false, true);
             }
         }
@@ -701,4 +701,3 @@
     </script>
 </body>
 </html>
-    
