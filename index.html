@@ -449,9 +449,12 @@
             const subTitulo = document.getElementById('subtitulo-dre');
 
             if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
-                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - Visão Consolidada Lado a Lado`;
-                subTitulo.innerText = "Comparativo entre todos os fornecedores (2026)";
-                badgeContainer.innerText = "Visão Lado a Lado por Fornecedor";
+                // Se o usuário selecionou "TODOS" no filtro de ano estando no Lado a Lado, tratamos como 2026 ou o ano desejado
+                let anoFiltroLadoALado = filtroAnoAtivo !== "TODOS" ? filtroAnoAtivo : "2026";
+
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - Visão Consolidada Lado a Lado (${anoFiltroLadoALado})`;
+                subTitulo.innerText = `Comparativo entre todos os fornecedores referentes ao exercício ${anoFiltroLadoALado}`;
+                badgeContainer.innerText = `Visão Lado a Lado por Fornecedor (${anoFiltroLadoALado})`;
 
                 let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
                 const canaisComparacao = [
@@ -472,7 +475,7 @@
 
                 let dadosCanais = {};
                 canaisComparacao.forEach(idC => {
-                    dadosCanais[idC] = calcularDadosCanalParaAno(idC, "2026").acumuladoAno;
+                    dadosCanais[idC] = calcularDadosCanalParaAno(idC, anoFiltroLadoALado).acumuladoAno;
                 });
 
                 function adicionarLinhaLadoALado(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
@@ -516,7 +519,7 @@
                 adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else if (filtroAnoAtivo !== "TODOS") {
-                // VISÃO DE UM ANO ESPECÍFICO SELECIONADO NO FILTRO
+                // VISÃO DE UM ANO ESPECÍFICO SELECIONADO NO FILTRO PARA UM FORNECEDOR ESPECÍFICO
                 document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${filtroAnoAtivo})`;
                 subTitulo.innerText = `Visão Individualizada do Exercício ${filtroAnoAtivo}`;
                 badgeContainer.innerText = `Base A.V.: Receita Líquida de ${filtroAnoAtivo} (100%)`;
@@ -566,7 +569,7 @@
                 adicionarLinhaUnica("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else {
-                // VISÃO ANO A ANO PADRÃO (TODOS OS ANOS LADO A LADO)
+                // VISÃO ANO A ANO PADRÃO PARA FORNECEDOR ESPECÍFICO (TODOS OS ANOS LADO A LADO)
                 document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
                 subTitulo.innerText = "Visão Comparativa Ano a Ano com Análise Vertical (%)";
                 badgeContainer.innerText = "Base A.V.: Receita Líquida do respectivo ano (100%)";
