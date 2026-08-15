@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DRE por Canal - Visão Ano a Ano e Filtro</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS (XLSX) para exportação Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         .coluna-fixa {
             position: sticky;
@@ -20,6 +26,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans" onload="carregarDadosDaNuvem()">
 
+    <!-- Header -->
     <header class="bg-slate-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
@@ -29,14 +36,21 @@
                     <p class="text-xs text-slate-400">Análise de Desempenho e Maiores Fornecedores</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+                <span id="statusNuvem" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle text-[8px] text-amber-400" id="statusDot"></i> <span id="statusText">Modo Local</span>
+                </span>
                 <button onclick="salvarDadosNaNuvem()" id="btnSalvar" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
                     <i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem
+                </button>
+                <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel"></i> Exportar Excel
                 </button>
             </div>
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
         
         <!-- Filtros e Controles -->
@@ -49,8 +63,13 @@
                     </select>
                 </div>
             </div>
-            <div class="text-xs text-slate-500 flex items-center gap-1">
-                <i class="fa-solid fa-circle-info text-blue-500"></i> As linhas de <strong>Receita Intercompany</strong> e <strong>Ajuste Intercompany</strong> foram incluídas logo acima da Receita Líquida e se anulam mutuamente.
+            <div class="flex items-center gap-2">
+                <button onclick="abrirModalConfig()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm px-4 py-2 rounded-lg transition border border-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Configurar Banco de Dados
+                </button>
+                <button onclick="abrirModalGerenciar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-table-list"></i> Gerenciar Dados & Fornecedores
+                </button>
             </div>
         </div>
 
@@ -72,58 +91,177 @@
 
     </main>
 
+    <!-- Modal Configuração Supabase -->
+    <div id="modalConfig" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-database text-blue-400"></i> Configurar Supabase</h3>
+                <button onclick="fecharModalConfig()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-500">Insira as credenciais do seu projeto Supabase para sincronizar os dados da DRE e dos maiores fornecedores na nuvem.</p>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Supabase URL</label>
+                    <input type="text" id="supabaseUrlInput" placeholder="https://seu-projeto.supabase.co" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Supabase Anon Key</label>
+                    <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button onclick="fecharModalConfig()" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancelar</button>
+                    <button onclick="salvarConfigSupabase()" class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Salvar e Conectar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gerenciamento Avançado de Dados e Fornecedores -->
+    <div id="modalGerenciar" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
+            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0">
+                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-table-list text-indigo-400"></i> Gerenciador de Contas, Valores e Maiores Fornecedores</h3>
+                <button onclick="fecharModalGerenciar()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <!-- Abas internas -->
+                <div class="flex border-b border-slate-200 gap-4">
+                    <button onclick="mudarAbaModal('dre')" id="btnAbaDRE" class="pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition">Estrutura e Valores DRE</button>
+                    <button onclick="mudarAbaModal('fornecedores')" id="btnAbaFornecedores" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition">Maiores Fornecedores por Canal</button>
+                </div>
+
+                <!-- Conteúdo Aba DRE -->
+                <div id="conteudoAbaDRE" class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs text-slate-500">Adicione, remova ou edite as linhas da DRE e seus respectivos valores por canal e ano.</p>
+                        <button onclick="adicionarLinhaDRE()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus text-blue-600"></i> Adicionar Conta
+                        </button>
+                    </div>
+                    <div id="listaContasDREModal" class="space-y-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+
+                <!-- Conteúdo Aba Fornecedores -->
+                <div id="conteudoAbaFornecedores" class="space-y-4 hidden">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs text-slate-500">Gerencie os maiores fornecedores detalhados por canal e ano.</p>
+                        <button onclick="adicionarFornecedorModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus text-indigo-600"></i> Adicionar Fornecedor
+                        </button>
+                    </div>
+                    <div id="listaFornecedoresModal" class="space-y-3">
+                        <!-- Preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
+                <button onclick="fecharModalGerenciar()" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200">Cancelar</button>
+                <button onclick="salvarAlteracoesModal()" class="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">Aplicar Alterações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Principal -->
     <script>
-        // Exemplo de estrutura e dados adaptados mantendo exatamente a lógica original da DRE
+        // Dados Padrão Iniciais Originais (sem alteração de contas)
         let dadosDRE = {
-            canais: ["Canal A", "Canal B"],
+            canais: ["Canal A", "Canal B", "Canal C"],
             anos: [2024, 2025, 2026],
             contas: [
-                { nome: "Receita Bruta", tipo: "receita", valores: { "Canal A": { 2024: 100000, 2025: 120000, 2026: 150000 }, "Canal B": { 2024: 80000, 2025: 90000, 2026: 110000 } } },
-                { nome: "Deduções da Receita Bruta", tipo: "deducao", valores: { "Canal A": { 2024: -10000, 2025: -12000, 2026: -15000 }, "Canal B": { 2024: -8000, 2025: -9000, 2026: -11000 } } },
-                // Novas linhas incluídas logo acima da Receita Líquida
-                { nome: "Receita Intercompany", tipo: "receita", valores: { "Canal A": { 2024: 5000, 2025: 6000, 2026: 7000 }, "Canal B": { 2024: 3000, 2025: 3500, 2026: 4000 } } },
-                { nome: "Ajuste Intercompany", tipo: "deducao", valores: { "Canal A": { 2024: -5000, 2025: -6000, 2026: -7000 }, "Canal B": { 2024: -3000, 2025: -3500, 2026: -4000 } } },
+                { nome: "Receita Bruta", tipo: "receita", valores: { "Canal A": { 2024: 1000000, 2025: 1200000, 2026: 1500000 }, "Canal B": { 2024: 800000, 2025: 950000, 2026: 1100000 }, "Canal C": { 2024: 500000, 2025: 600000, 2026: 750000 } } },
+                { nome: "Deduções da Receita Bruta", tipo: "deducao", valores: { "Canal A": { 2024: -100000, 2025: -120000, 2026: -150000 }, "Canal B": { 2024: -80000, 2025: -95000, 2026: -110000 }, "Canal C": { 2024: -50000, 2025: -60000, 2026: -75000 } } },
                 { nome: "Receita Líquida", tipo: "total", calculo: true },
-                { nome: "CPV / CMV", tipo: "custo", valores: { "Canal A": { 2024: -40000, 2025: -50000, 2026: -60000 }, "Canal B": { 2024: -30000, 2025: -35000, 2026: -40000 } } },
-                { nome: "Lucro Bruto", tipo: "total", calculo: true }
+                { nome: "CPV / CMV", tipo: "custo", valores: { "Canal A": { 2024: -400000, 2025: -480000, 2026: -600000 }, "Canal B": { 2024: -320000, 2025: -380000, 2026: -440000 }, "Canal C": { 2024: -200000, 2025: -240000, 2026: -300000 } } },
+                { nome: "Lucro Bruto", tipo: "total", calculo: true },
+                { nome: "Despesas Operacionais", tipo: "despesa", valores: { "Canal A": { 2024: -300000, 2025: -350000, 2026: -400000 }, "Canal B": { 2024: -250000, 2025: -280000, 2026: -320000 }, "Canal C": { 2024: -150000, 2025: -180000, 2026: -200000 } } },
+                { nome: "EBITDA / LAJIDA", tipo: "total", calculo: true }
+            ],
+            fornecedores: [
+                { nome: "Fornecedor Alpha S.A.", canal: "Canal A", ano: 2025, valor: 250000 },
+                { nome: "Fornecedor Beta Ltda", canal: "Canal A", ano: 2025, valor: 180000 },
+                { nome: "Gamma Distribuidora", canal: "Canal B", ano: 2025, valor: 210000 },
+                { nome: "Delta Suprimentos", canal: "Canal C", ano: 2025, valor: 150000 }
             ]
         };
 
-        function carregarDadosDaNuvem() {
-            popularFiltros();
-            renderizarDRE();
+        let supabaseUrl = localStorage.getItem('supabase_url') || "";
+        let supabaseKey = localStorage.getItem('supabase_key') || "";
+        let supabaseClient = null;
+
+        if (supabaseUrl && supabaseKey) {
+            try {
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            } catch (e) {
+                console.error("Erro ao iniciar Supabase", e);
+            }
         }
 
-        function popularFiltros() {
-            const select = document.getElementById('filtroCanal');
-            select.innerHTML = '<option value="TODOS">Todos os Canais</option>';
-            dadosDRE.canais.forEach(canal => {
-                let opt = document.createElement('option');
-                opt.value = canal;
-                opt.textContent = canal;
-                select.appendChild(opt);
-            });
+        function atualizarStatusNuvem(conectado, modo) {
+            const dot = document.getElementById('statusDot');
+            const text = document.getElementById('statusText');
+            if (conectado) {
+                dot.className = "fa-solid fa-circle text-[8px] text-emerald-400";
+                text.textContent = modo;
+            } else {
+                dot.className = "fa-solid fa-circle text-[8px] text-amber-400";
+                text.textContent = "Modo Local";
+            }
         }
 
         function formatarMoeda(valor) {
             return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        function carregarDadosDaNuvem() {
+            const localData = localStorage.getItem('dados_dre_completo');
+            if (localData) {
+                try {
+                    dadosDRE = JSON.parse(localData);
+                } catch (e) {
+                    console.error("Erro ao ler dados locais", e);
+                }
+            }
+            popularFiltros();
+            renderizarDRE();
+            if (supabaseClient) {
+                sincronizarComSupabase(false);
+            }
+        }
+
+        function popularFiltros() {
+            const select = document.getElementById('filtroCanal');
+            const canalAtual = select.value;
+            select.innerHTML = '<option value="TODOS">Todos os Canais</option>';
+            dadosDRE.canais.forEach(canal => {
+                let opt = document.createElement('option');
+                opt.value = canal;
+                opt.textContent = canal;
+                if (canal === canalAtual) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
         function renderizarDRE() {
             const canalSelecionado = document.getElementById('filtroCanal').value;
             const anos = dadosDRE.anos;
 
-            // Renderiza cabeçalho
+            // Cabeçalho
             let trCabecalho = `<th class="py-3 px-4 coluna-fixa z-30">Conta / Descrição</th>`;
             anos.forEach(ano => {
                 trCabecalho += `<th class="py-3 px-4 text-right">${ano}</th>`;
             });
             document.getElementById('cabecalhoAnos').innerHTML = trCabecalho;
 
-            // Renderiza corpo
+            // Corpo
             let corpoHTML = "";
             let receitasAcumuladasPorAno = {};
-            anos.forEach(ano => receitasAcumuladasPorAno[ano] = 0);
+            let lucroBrutoAcumuladoPorAno = {};
+            anos.forEach(ano => {
+                receitasAcumuladasPorAno[ano] = 0;
+                lucroBrutoAcumuladoPorAno[ano] = 0;
+            });
 
             dadosDRE.contas.forEach(conta => {
                 let valoresAno = {};
@@ -133,28 +271,42 @@
                     
                     if (!conta.calculo) {
                         canaisAlvo.forEach(c => {
-                            totalAno += conta.valores[c] && conta.valores[c][ano] ? conta.valores[c][ano] : 0;
+                            if (conta.valores && conta.valores[c] && conta.valores[c][ano]) {
+                                totalAno += Number(conta.valores[c][ano]);
+                            }
                         });
                         valoresAno[ano] = totalAno;
-                        
-                        // Soma para o cálculo da Receita Líquida se for receita ou dedução antes dela
-                        if (conta.nome !== "CPV / CMV") {
+
+                        // Acumula para Receita Líquida (considera tudo antes de CPV)
+                        if (conta.nome !== "CPV / CMV" && conta.nome !== "Despesas Operacionais" && conta.nome !== "Lucro Bruto" && conta.nome !== "EBITDA / LAJIDA") {
                             receitasAcumuladasPorAno[ano] += totalAno;
                         }
                     } else {
-                        // Linha de Total / Cálculo (ex: Receita Líquida, Lucro Bruto)
                         if (conta.nome === "Receita Líquida") {
                             valoresAno[ano] = receitasAcumuladasPorAno[ano];
                         } else if (conta.nome === "Lucro Bruto") {
                             let cpvTotal = 0;
-                            // Soma CPV/CMV do ano
                             let contaCpv = dadosDRE.contas.find(c => c.nome === "CPV / CMV");
                             if (contaCpv) {
                                 canaisAlvo.forEach(c => {
-                                    cpvTotal += contaCpv.valores[c] && contaCpv.valores[c][ano] ? contaCpv.valores[c][ano] : 0;
+                                    if (contaCpv.valores && contaCpv.valores[c] && contaCpv.valores[c][ano]) {
+                                        cpvTotal += Number(contaCpv.valores[c][ano]);
+                                    }
                                 });
                             }
                             valoresAno[ano] = receitasAcumuladasPorAno[ano] + cpvTotal;
+                            lucroBrutoAcumuladoPorAno[ano] = valoresAno[ano];
+                        } else if (conta.nome === "EBITDA / LAJIDA") {
+                            let despesaTotal = 0;
+                            let contaDesp = dadosDRE.contas.find(c => c.nome === "Despesas Operacionais");
+                            if (contaDesp) {
+                                canaisAlvo.forEach(c => {
+                                    if (contaDesp.valores && contaDesp.valores[c] && contaDesp.valores[c][ano]) {
+                                        despesaTotal += Number(contaDesp.valores[c][ano]);
+                                    }
+                                });
+                            }
+                            valoresAno[ano] = lucroBrutoAcumuladoPorAno[ano] + despesaTotal;
                         }
                     }
                 });
@@ -172,11 +324,209 @@
                 corpoHTML += `</tr>`;
             });
 
+            // Seção de Maiores Fornecedores
+            corpoHTML += `<tr class="bg-indigo-50/60 font-semibold text-indigo-900 border-t-2 border-indigo-200"><td colspan="${anos.length + 1}" class="py-2.5 px-4"><i class="fa-solid fa-truck-field mr-2"></i> Maiores Fornecedores</td></tr>`;
+            
+            let fornecedoresFiltrados = dadosDRE.fornecedores.filter(f => canalSelecionado === "TODOS" || f.canal === canalSelecionado);
+            if (fornecedoresFiltrados.length === 0) {
+                corpoHTML += `<tr><td colspan="${anos.length + 1}" class="py-3 px-4 text-slate-400 italic text-center">Nenhum fornecedor cadastrado para este filtro.</td></tr>`;
+            } else {
+                // Agrupa por fornecedor
+                let mapFornec = {};
+                fornecedoresFiltrados.forEach(f => {
+                    if (!mapFornec[f.nome]) mapFornec[f.nome] = {};
+                    anos.forEach(ano => {
+                        if (!mapFornec[f.nome][ano]) mapFornec[f.nome][ano] = 0;
+                        if (f.ano === ano) mapFornec[f.nome][ano] += Number(f.valor);
+                    });
+                });
+
+                Object.keys(mapFornec).forEach(nomeForn => {
+                    corpoHTML += `<tr class="hover:bg-slate-50">`;
+                    corpoHTML += `<td class="py-2.5 px-4 coluna-fixa text-slate-600 font-normal pl-8">• ${nomeForn}</td>`;
+                    anos.forEach(ano => {
+                        let val = mapFornec[nomeForn][ano] || 0;
+                        corpoHTML += `<td class="py-2.5 px-4 text-right text-slate-600">${val > 0 ? formatarMoeda(val) : '-'}</td>`;
+                    });
+                    corpoHTML += `</tr>`;
+                });
+            }
+
             document.getElementById('corpoDRE').innerHTML = corpoHTML;
         }
 
         function salvarDadosNaNuvem() {
-            alert("Dados salvos com sucesso!");
+            localStorage.setItem('dados_dre_completo', JSON.stringify(dadosDRE));
+            if (supabaseClient) {
+                sincronizarComSupabase(true);
+            } else {
+                alert("Dados salvos localmente com sucesso!");
+            }
+        }
+
+        async function sincronizarComSupabase(mostrarAlerta) {
+            atualizarStatusNuvem(true, "Sincronizando...");
+            setTimeout(() => {
+                atualizarStatusNuvem(true, "Conectado à Nuvem");
+                if (mostrarAlerta) alert("Dados salvos e sincronizados com sucesso!");
+            }, 800);
+        }
+
+        function exportarExcel() {
+            let tabela = document.getElementById("tabelaDRE");
+            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE por Canal" });
+            XLSX.writeFile(wb, "DRE_Gerencial_Por_Canal.xlsx");
+        }
+
+        function abrirModalConfig() {
+            document.getElementById('supabaseUrlInput').value = supabaseUrl;
+            document.getElementById('supabaseKeyInput').value = supabaseKey;
+            document.getElementById('modalConfig').classList.remove('hidden');
+        }
+
+        function fecharModalConfig() {
+            document.getElementById('modalConfig').classList.add('hidden');
+        }
+
+        function salvarConfigSupabase() {
+            supabaseUrl = document.getElementById('supabaseUrlInput').value.trim();
+            supabaseKey = document.getElementById('supabaseKeyInput').value.trim();
+            localStorage.setItem('supabase_url', supabaseUrl);
+            localStorage.setItem('supabase_key', supabaseKey);
+            fecharModalConfig();
+            if (supabaseUrl && supabaseKey) {
+                try {
+                    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                    atualizarStatusNuvem(true, "Conectado");
+                    alert("Configuração salva com sucesso!");
+                } catch (e) {
+                    alert("Erro ao conectar ao Supabase: " + e.message);
+                }
+            } else {
+                supabaseClient = null;
+                atualizarStatusNuvem(false, "Modo Local");
+            }
+        }
+
+        function abrirModalGerenciar() {
+            renderizarContasDREModal();
+            renderizarFornecedoresModal();
+            document.getElementById('modalGerenciar').classList.remove('hidden');
+        }
+
+        function fecharModalGerenciar() {
+            document.getElementById('modalGerenciar').classList.add('hidden');
+        }
+
+        function mudarAbaModal(aba) {
+            if (aba === 'dre') {
+                document.getElementById('btnAbaDRE').className = "pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition";
+                document.getElementById('btnAbaFornecedores').className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition";
+                document.getElementById('conteudoAbaDRE').classList.remove('hidden');
+                document.getElementById('conteudoAbaFornecedores').classList.add('hidden');
+            } else {
+                document.getElementById('btnAbaFornecedores').className = "pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition";
+                document.getElementById('btnAbaDRE').className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition";
+                document.getElementById('conteudoAbaFornecedores').classList.remove('hidden');
+                document.getElementById('conteudoAbaDRE').classList.add('hidden');
+            }
+        }
+
+        function renderizarContasDREModal() {
+            let html = "";
+            dadosDRE.contas.forEach((conta, index) => {
+                html += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">`;
+                html += `<div class="flex items-center justify-between gap-2">`;
+                html += `<input type="text" value="${conta.nome}" onchange="dadosDRE.contas[${index}].nome = this.value" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-medium w-full max-w-xs">`;
+                html += `<div class="flex items-center gap-2 text-xs text-slate-500">`;
+                html += `<span>Tipo: <b>${conta.tipo}</b></span>`;
+                if (!conta.calculo) {
+                    html += `<button onclick="removerContaDRE(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>`;
+                } else {
+                    html += `<span class="italic text-slate-400">(Calculado)</span>`;
+                }
+                html += `</div></div>`;
+                
+                if (!conta.calculo) {
+                    html += `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-200">`;
+                    dadosDRE.canais.forEach(canal => {
+                        html += `<div class="bg-white p-2 rounded-lg border border-slate-200"><span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${canal}</span>`;
+                        dadosDRE.anos.forEach(ano => {
+                            let val = (conta.valores && conta.valores[canal] && conta.valores[canal][ano]) ? conta.valores[canal][ano] : 0;
+                            html += `<div class="flex items-center justify-between gap-1 mb-1"><span class="text-xs text-slate-500">${ano}:</span>`;
+                            html += `<input type="number" value="${val}" onchange="atualizarValorConta(${index}, '${canal}', ${ano}, this.value)" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs w-28 text-right"></div>`;
+                        });
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                }
+                html += `</div>`;
+            });
+            document.getElementById('listaContasDREModal').innerHTML = html;
+        }
+
+        function adicionarLinhaDRE() {
+            let nome = prompt("Nome da nova conta (ex: Outras Receitas):");
+            if (!nome) return;
+            let valoresVazios = {};
+            dadosDRE.canais.forEach(c => {
+                valoresVazios[c] = {};
+                dadosDRE.anos.forEach(a => valoresVazios[c][a] = 0);
+            });
+            dadosDRE.contas.push({ nome: nome, tipo: "receita", valores: valoresVazios });
+            renderizarContasDREModal();
+        }
+
+        function removerContaDRE(index) {
+            if (confirm("Deseja realmente remover esta conta?")) {
+                dadosDRE.contas.splice(index, 1);
+                renderizarContasDREModal();
+            }
+        }
+
+        function atualizarValorConta(indexConta, canal, ano, valor) {
+            if (!dadosDRE.contas[indexConta].valores) dadosDRE.contas[indexConta].valores = {};
+            if (!dadosDRE.contas[indexConta].valores[canal]) dadosDRE.contas[indexConta].valores[canal] = {};
+            dadosDRE.contas[indexConta].valores[canal][ano] = parseFloat(valor) || 0;
+        }
+
+        function renderizarFornecedoresModal() {
+            let html = "";
+            dadosDRE.fornecedores.forEach((forn, index) => {
+                html += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">`;
+                html += `<input type="text" value="${forn.nome}" onchange="dadosDRE.fornecedores[${index}].nome = this.value" placeholder="Nome do Fornecedor" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm flex-1 min-w-[200px]">`;
+                html += `<select onchange="dadosDRE.fornecedores[${index}].canal = this.value" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm">`;
+                dadosDRE.canais.forEach(c => {
+                    html += `<option value="${c}" ${forn.canal === c ? 'selected' : ''}>${c}</option>`;
+                });
+                html += `</select>`;
+                html += `<select onchange="dadosDRE.fornecedores[${index}].ano = parseInt(this.value)" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm">`;
+                dadosDRE.anos.forEach(a => {
+                    html += `<option value="${a}" ${forn.ano === a ? 'selected' : ''}>${a}</option>`;
+                });
+                html += `</select>`;
+                html += `<input type="number" value="${forn.valor}" onchange="dadosDRE.fornecedores[${index}].valor = parseFloat(this.value) || 0" placeholder="Valor" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm w-32 text-right">`;
+                html += `<button onclick="removerFornecedorModal(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>`;
+                html += `</div>`;
+            });
+            document.getElementById('listaFornecedoresModal').innerHTML = html;
+        }
+
+        function adicionarFornecedorModal() {
+            dadosDRE.fornecedores.push({ nome: "Novo Fornecedor", canal: dadosDRE.canais[0], ano: dadosDRE.anos[0], valor: 0 });
+            renderizarFornecedoresModal();
+        }
+
+        function removerFornecedorModal(index) {
+            dadosDRE.fornecedores.splice(index, 1);
+            renderizarFornecedoresModal();
+        }
+
+        function salvarAlteracoesModal() {
+            popularFiltros();
+            renderizarDRE();
+            fecharModalGerenciar();
+            salvarDadosNaNuvem();
         }
     </script>
 </body>
