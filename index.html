@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRE por Canal - Visão por Ano, Mês a Mês e Acumulado</title>
+    <title>DRE por Canal - Visão por Ano e Acumulado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">DRE Individualizada por Fornecedor</h1>
-                    <p class="text-xs text-slate-400">Visão Anual, Mês a Mês, Análise Vertical e Acumulado (Nuvem Compartilhada)</p>
+                    <p class="text-xs text-slate-400">Visão Anual, Análise Vertical e Acumulado (Nuvem Compartilhada)</p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -69,7 +69,7 @@
             <div class="px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 gap-2">
                 <div>
                     <h2 id="titulo-dre-canal" class="font-bold text-slate-800 text-base">DRE - Fornecedor</h2>
-                    <p class="text-xs text-slate-500">Visão Mensal por Ano, Análise Vertical (%) sobre a Receita Líquida e Acumulado do Ano</p>
+                    <p class="text-xs text-slate-500">Visão Anual, Análise Vertical (%) sobre a Receita Líquida e Acumulado do Ano</p>
                 </div>
                 <div id="badge-av-container" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
                     Base A.V.: Receita Líquida do Fornecedor (100%)
@@ -131,6 +131,9 @@
                             <option value="OURO FINO">OURO FINO</option>
                             <option value="ORGANACT PET">ORGANACT PET</option>
                             <option value="AVERT">AVERT</option>
+                            <option value="VANSIL">VANSIL</option>
+                            <option value="MUNDO ANIMAL">MUNDO ANIMAL</option>
+                            <option value="FARMINA">FARMINA</option>
                         </select>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
@@ -163,7 +166,6 @@
                         <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
                     </div>
                 </div>
-
                 <div class="space-y-3">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-200 pb-2">
                         <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos por Mês</h4>
@@ -197,14 +199,14 @@
     <!-- Scripts externos para exportação Excel e PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    
     <script>
         const BIN_ID = "6a60f751da38895dfe805e30";
         const API_KEY = "$2a$10$2gRuysiXM85zMZ4OTG2dU.AEaN0WyPHJveZ2wy62/tqidY73EOJBS";
-
+        
         const mesesNomes = {
-            "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
-            "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
+            "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril", 
+            "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto", 
             "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro"
         };
 
@@ -214,6 +216,9 @@
             { id: "OURO FINO", nome: "OURO FINO" },
             { id: "ORGANACT PET", nome: "ORGANACT PET" },
             { id: "AVERT", nome: "AVERT" },
+            { id: "VANSIL", nome: "VANSIL" },
+            { id: "MUNDO ANIMAL", nome: "MUNDO ANIMAL" },
+            { id: "FARMINA", nome: "FARMINA" },
             { id: "CONSOLIDADO", nome: "CONSOLIDADO (TOTAL)" },
             { id: "CONSOLIDADO_LADO_A_LADO", nome: "📊 CONSOLIDADO LADO A LADO" }
         ];
@@ -315,7 +320,6 @@
             document.getElementById('lanc-tipo').value = l.tipo || "receita_bruta";
             document.getElementById('lanc-valor').value = l.valor;
             document.getElementById('lanc-desc').value = l.desc || "";
-
             const modalBody = document.querySelector('#admin-modal .overflow-y-auto');
             if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -459,7 +463,7 @@
         function calcularDadosCanalParaAno(nomeCanal, ano) {
             let mesesAtivos = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
             let lancsCanalAno = [];
-            const fornecedoresOficiais = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT"];
+            const fornecedoresOficiais = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT", "VANSIL", "MUNDO ANIMAL", "FARMINA"];
 
             if (nomeCanal === "CONSOLIDADO") {
                 lancsCanalAno = lancamentos.filter(l => l.ano === ano && fornecedoresOficiais.includes(l.canal));
@@ -472,8 +476,8 @@
                 dadosMes[mes] = {
                     receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
                     cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
-                    comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0, total_desp: 0,
-                    ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
+                    comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
+                    total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
                 };
             });
 
@@ -498,8 +502,8 @@
             let acumuladoAno = {
                 receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
                 cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
-                comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0, total_desp: 0,
-                ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
+                comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
+                total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
             };
 
             Object.values(dadosMes).forEach(dm => {
@@ -514,7 +518,7 @@
         function calcularEAtualizarDRE() {
             const objCanalAtivo = canais.find(c => c.id === canalAtivo) || canais[0];
             document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${anoAtivo})`;
-
+            
             const badgeContainer = document.getElementById('badge-av-container');
             if (canalAtivo === "CONSOLIDADO") {
                 badgeContainer.innerText = "Base A.V.: Receita Líquida Consolidada (100%)";
@@ -530,12 +534,16 @@
 
             if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
                 let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
-                const canaisComparacao = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT", "CONSOLIDADO"];
+                const canaisComparacao = [
+                    "BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", 
+                    "AVERT", "VANSIL", "MUNDO ANIMAL", "FARMINA", "CONSOLIDADO"
+                ];
                 const rotulosCurtos = {
-                    "BOEHRINGER": "BOEHRINGER", "PREMIER": "PREMIER", "OURO FINO": "OURO FINO",
-                    "ORGANACT PET": "ORGANACT", "AVERT": "AVERT", "CONSOLIDADO": "TOTAL GERAL"
+                    "BOEHRINGER": "BOEHRINGER", "PREMIER": "PREMIER", "OURO FINO": "OURO FINO", 
+                    "ORGANACT PET": "ORGANACT", "AVERT": "AVERT", "VANSIL": "VANSIL", 
+                    "MUNDO ANIMAL": "M. ANIMAL", "FARMINA": "FARMINA", "CONSOLIDADO": "TOTAL GERAL"
                 };
-
+                
                 canaisComparacao.forEach(idC => {
                     theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]} (Acum.)</th>`;
                     theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.</th>`;
@@ -570,7 +578,7 @@
                     tbody.appendChild(tr);
                 }
 
-                adicionarLinhaLadoALado("Receita Bruta Total", dm => dm.receita_bruta, true, false);
+                adicionarLinhaLadoALado("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
                 adicionarLinhaLadoALado("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
                 adicionarLinhaLadoALado("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
                 adicionarLinhaLadoALado("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
@@ -588,19 +596,14 @@
                 adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else {
-                let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
-                let mesesChaves = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-                let mesesAbreviados = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+                theadTr.innerHTML = `
+                    <th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">Acumulado (${anoAtivo})</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">A.V. (%)</th>
+                `;
 
-                mesesAbreviados.forEach((m, idx) => {
-                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-200 font-semibold bg-slate-100">${m}</th>`;
-                    theadHtml += `<th class="py-3 px-1 text-right text-[10px] text-slate-500 font-medium bg-slate-100">A.V.</th>`;
-                });
-                theadHtml += '<th class="py-3 px-3 text-right border-l-2 border-slate-300 font-bold bg-slate-100">Acumulado</th>';
-                theadHtml += '<th class="py-3 px-1 text-right text-[10px] text-slate-500 font-bold bg-slate-100">A.V.</th>';
-                theadTr.innerHTML = theadHtml;
-
-                let { dadosMes, acumuladoAno } = calcularDadosCanalParaAno(canalAtivo, anoAtivo);
+                let dadosAno = calcularDadosCanalParaAno(canalAtivo, anoAtivo).acumuladoAno;
+                let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
 
                 function adicionarLinhaDRE(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
                     let tr = document.createElement('tr');
@@ -608,34 +611,19 @@
                     else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
                     else tr.className = 'hover:bg-slate-50/80 transition';
 
-                    let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
-                    mesesChaves.forEach(m => {
-                        let dm = dadosMes[m];
-                        let val = seletorValor(dm);
-                        let baseAV = dm.receita_liquida !== 0 ? dm.receita_liquida : 1;
-                        let av = (val / baseAV) * 100;
-                        let valExibicao = forcarParenteses && val > 0 ? -val : val;
+                    let val = seletorValor(dadosAno);
+                    let av = (val / baseAV) * 100;
+                    let valExibicao = forcarParenteses && val > 0 ? -val : val;
 
-                        html += `
-                            <td class="py-2.5 px-2 text-right border-l border-slate-200">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
-                            <td class="py-2.5 px-1 text-right text-slate-500 text-[11px]">${formatarPercentual(av, isHeader || isSubtotal)}</td>
-                        `;
-                    });
-
-                    let valAcum = seletorValor(acumuladoAno);
-                    let baseAcumAV = acumuladoAno.receita_liquida !== 0 ? acumuladoAno.receita_liquida : 1;
-                    let avAcum = (valAcum / baseAcumAV) * 100;
-                    let valAcumExibicao = forcarParenteses && valAcum > 0 ? -valAcum : valAcum;
-
-                    html += `
-                        <td class="py-2.5 px-3 text-right border-l-2 border-slate-300 font-bold">${formatarMoeda(valAcumExibicao, isHeader || isSubtotal)}</td>
-                        <td class="py-2.5 px-1 text-right text-slate-600 font-bold text-[11px]">${formatarPercentual(avAcum, isHeader || isSubtotal)}</td>
+                    tr.innerHTML = `
+                        <td class="px-4 py-2.5 coluna-fixa">${nome}</td>
+                        <td class="py-2.5 px-4 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                        <td class="py-2.5 px-4 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
                     `;
-                    tr.innerHTML = html;
                     tbody.appendChild(tr);
                 }
 
-                adicionarLinhaDRE("Receita Bruta Total", dm => dm.receita_bruta, true, false);
+                adicionarLinhaDRE("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
                 adicionarLinhaDRE("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
                 adicionarLinhaDRE("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
                 adicionarLinhaDRE("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
@@ -655,24 +643,21 @@
         }
 
         function exportarExcel() {
-            const tabela = document.getElementById("tabela-dre-dados");
-            if (!tabela) return;
-            const wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE" });
-            const objCanal = canais.find(c => c.id === canalAtivo) || { nome: canalAtivo };
-            XLSX.writeFile(wb, `DRE_${objCanal.nome}_${anoAtivo}.xlsx`);
+            let tabela = document.getElementById("tabela-dre-dados");
+            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE Anual" });
+            XLSX.writeFile(wb, `DRE_${canalAtivo}_${anoAtivo}.xlsx`);
         }
 
         function exportarPDF() {
             const elemento = document.getElementById("dre-container-export");
-            const objCanal = canais.find(c => c.id === canalAtivo) || { nome: canalAtivo };
-            const opcoes = {
-                margin: 10,
-                filename: `DRE_${objCanal.nome}_${anoAtivo}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            const opt = {
+                margin:       10,
+                filename:     `DRE_${canalAtivo}_${anoAtivo}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
-            html2pdf().from(elemento).set(opcoes).save();
+            html2pdf().from(elemento).set(opt).save();
         }
     </script>
 </body>
