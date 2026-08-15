@@ -96,33 +96,14 @@
             <div class="p-6 space-y-4 overflow-y-auto flex-1">
                 <input type="hidden" id="lanc-index-editando" value="-1">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
-                    <h4 id="form-titulo-painel" class="text-xs font-bold text-slate-700 uppercase tracking-wide">Novo Lançamento</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Mês de Competência</label>
-                            <select id="lanc-mes" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Ano</label>
-                            <select id="lanc-ano" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                                <option value="2026">2026</option>
-                                <option value="2025">2025</option>
-                                <option value="2024">2024</option>
-                            </select>
-                        </div>
+                    <h4 id="form-titulo-painel" class="text-xs font-bold text-slate-700 uppercase tracking-wide">Novo Lançamento Anual</h4>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Exercício (Ano)</label>
+                        <select id="lanc-ano" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Selecione o Fornecedor</label>
@@ -154,13 +135,13 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor (R$)</label>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor Anual (R$)</label>
                             <input type="text" id="lanc-valor" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
                         </div>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descrição / Histórico</label>
-                        <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento...">
+                        <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento anual...">
                     </div>
                     <div class="flex justify-end space-x-2 pt-1">
                         <button id="btn-cancelar-edicao" onclick="limparFormularioEdicao()" class="hidden px-3 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100">Cancelar Edição</button>
@@ -169,23 +150,8 @@
                 </div>
                 <div class="space-y-3">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-200 pb-2">
-                        <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos por Mês</h4>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos Cadastrados</h4>
                         <div class="flex items-center gap-2">
-                            <select id="filtro-mes-lancamentos" onchange="renderizarLancamentosRecentes()" class="border border-slate-300 rounded-lg p-1.5 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                                <option value="TODOS">Todos os Meses</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
                             <button onclick="tentarLimparHistorico()" class="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition">
                                 <i class="fa-solid fa-trash-can"></i> Limpar Tudo
                             </button>
@@ -204,12 +170,6 @@
     <script>
         const BIN_ID = "6a60f751da38895dfe805e30";
         const API_KEY = "$2a$10$2gRuysiXM85zMZ4OTG2dU.AEaN0WyPHJveZ2wy62/tqidY73EOJBS";
-        
-        const mesesNomes = {
-            "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril", 
-            "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto", 
-            "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro"
-        };
 
         const canais = [
             { id: "BOEHRINGER", nome: "BOEHRINGER" },
@@ -299,7 +259,7 @@
 
         function limparFormularioEdicao() {
             document.getElementById('lanc-index-editando').value = "-1";
-            document.getElementById('form-titulo-painel').innerText = "Novo Lançamento";
+            document.getElementById('form-titulo-painel').innerText = "Novo Lançamento Anual";
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
             document.getElementById('lanc-valor').value = "";
             document.getElementById('lanc-desc').value = "";
@@ -315,7 +275,6 @@
             document.getElementById('lanc-index-editando').value = realIdx;
             document.getElementById('form-titulo-painel').innerText = "Editando Lançamento (Índice #" + realIdx + ")";
             document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
-            document.getElementById('lanc-mes').value = l.mes || "01";
             document.getElementById('lanc-ano').value = l.ano || "2026";
             document.getElementById('lanc-canal').value = l.canal || "BOEHRINGER";
             document.getElementById('lanc-tipo').value = l.tipo || "receita_bruta";
@@ -368,13 +327,12 @@
         }
 
         async function salvarLancamento() {
-            const mes = document.getElementById('lanc-mes').value;
             const ano = document.getElementById('lanc-ano').value;
             const canal = document.getElementById('lanc-canal').value;
             const tipo = document.getElementById('lanc-tipo').value;
             let valorStr = document.getElementById('lanc-valor').value.trim().replace(',', '.');
             let valor = parseFloat(valorStr);
-            const desc = document.getElementById('lanc-desc').value || "Lançamento DRE";
+            const desc = document.getElementById('lanc-desc').value || "Lançamento DRE Anual";
             const indexEditando = parseInt(document.getElementById('lanc-index-editando').value);
 
             if (isNaN(valor) || valor <= 0) {
@@ -387,7 +345,7 @@
                 tipo: String(tipo).trim(),
                 valor: Number(valor),
                 desc,
-                mes: String(mes),
+                mes: "01", // Mês padrão fixo interno para manter a soma anual íntegra
                 ano: String(ano)
             };
 
@@ -419,7 +377,6 @@
 
         function renderizarLancamentosRecentes() {
             const container = document.getElementById('lista-lancamentos-recentes');
-            const mesFiltro = document.getElementById('filtro-mes-lancamentos').value;
             container.innerHTML = '';
 
             if (lancamentos.length === 0) {
@@ -427,28 +384,14 @@
                 return;
             }
 
-            let lancamentosFiltrados = [];
             lancamentos.slice().reverse().forEach((l, idx) => {
                 const realIdx = lancamentos.length - 1 - idx;
-                if (mesFiltro === "TODOS" || l.mes === mesFiltro) {
-                    lancamentosFiltrados.push({ l, realIdx });
-                }
-            });
-
-            if (lancamentosFiltrados.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 py-2">Nenhum lançamento para o mês de ${mesesNomes[mesFiltro] || mesFiltro}.</p>`;
-                return;
-            }
-
-            lancamentosFiltrados.forEach(item => {
-                const l = item.l;
-                const realIdx = item.realIdx;
                 const canalObj = canais.find(c => c.id === l.canal);
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 gap-2 shadow-xs';
                 div.innerHTML = `
                     <div class="truncate">
-                        <span class="inline-block bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded mr-1">${l.mes}/${l.ano}</span>
+                        <span class="inline-block bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded mr-1">Ano: ${l.ano}</span>
                         <strong>${canalObj?.nome || l.canal}</strong> - <span class="text-slate-500">${l.tipo}</span>: <span class="font-semibold text-slate-800">${formatarMoeda(l.valor)}</span>
                         ${l.desc ? `<div class="text-slate-400 text-[10px] truncate">${l.desc}</div>` : ''}
                     </div>
@@ -462,7 +405,6 @@
         }
 
         function calcularDadosCanalParaAno(nomeCanal, ano) {
-            let mesesAtivos = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
             let lancsCanalAno = [];
             const fornecedoresOficiais = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT", "VANSIL", "MUNDO ANIMAL", "FARMINA"];
 
@@ -472,34 +414,6 @@
                 lancsCanalAno = lancamentos.filter(l => l.canal === nomeCanal && l.ano === ano);
             }
 
-            let dadosMes = {};
-            mesesAtivos.forEach(mes => {
-                dadosMes[mes] = {
-                    receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
-                    cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
-                    comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
-                    total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
-                };
-            });
-
-            lancsCanalAno.forEach(l => {
-                let m = l.mes || "01";
-                let t = l.tipo;
-                if (dadosMes[m] && dadosMes[m][t] !== undefined) {
-                    dadosMes[m][t] += Number(l.valor);
-                }
-            });
-
-            Object.keys(dadosMes).forEach(m => {
-                let dm = dadosMes[m];
-                dm.receita_liquida = dm.receita_bruta - dm.deducao_receita - dm.impostos;
-                dm.lucro_bruto = dm.receita_liquida - dm.cmv;
-                dm.lucro_bruto_ajustado = dm.lucro_bruto + dm.verbas_comerciais;
-                dm.total_desp = dm.comissoes + dm.pessoal + dm.comercial + dm.pessoal_direta;
-                dm.ebitda = dm.lucro_bruto_ajustado - dm.total_desp;
-                dm.ebitda_ajustado = dm.ebitda - dm.corporativas_indiretas;
-            });
-
             let acumuladoAno = {
                 receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
                 cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
@@ -507,13 +421,21 @@
                 total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
             };
 
-            Object.values(dadosMes).forEach(dm => {
-                Object.keys(acumuladoAno).forEach(k => {
-                    acumuladoAno[k] += dm[k];
-                });
+            lancsCanalAno.forEach(l => {
+                let t = l.tipo;
+                if (acumuladoAno[t] !== undefined) {
+                    acumuladoAno[t] += Number(l.valor);
+                }
             });
 
-            return { dadosMes, acumuladoAno };
+            acumuladoAno.receita_liquida = acumuladoAno.receita_bruta - acumuladoAno.deducao_receita - acumuladoAno.impostos;
+            acumuladoAno.lucro_bruto = acumuladoAno.receita_liquida - acumuladoAno.cmv;
+            acumuladoAno.lucro_bruto_ajustado = acumuladoAno.lucro_bruto + acumuladoAno.verbas_comerciais;
+            acumuladoAno.total_desp = acumuladoAno.comissoes + acumuladoAno.pessoal + acumuladoAno.comercial + acumuladoAno.pessoal_direta;
+            acumuladoAno.ebitda = acumuladoAno.lucro_bruto_ajustado - acumuladoAno.total_desp;
+            acumuladoAno.ebitda_ajustado = acumuladoAno.ebitda - acumuladoAno.corporativas_indiretas;
+
+            return { acumuladoAno };
         }
 
         function calcularEAtualizarDRE() {
@@ -546,7 +468,7 @@
                 };
                 
                 canaisComparacao.forEach(idC => {
-                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]} (Acum.)</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]}</th>`;
                     theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.</th>`;
                 });
                 theadTr.innerHTML = theadHtml;
@@ -599,7 +521,7 @@
             } else {
                 theadTr.innerHTML = `
                     <th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
-                    <th class="py-3 px-4 text-right bg-slate-100">Acumulado (${anoAtivo})</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">Valor Anual (${anoAtivo})</th>
                     <th class="py-3 px-4 text-right bg-slate-100">A.V. (%)</th>
                 `;
 
