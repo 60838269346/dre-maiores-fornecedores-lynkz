@@ -127,6 +127,8 @@
                                 <option value="receita_bruta">Receita Bruta (Vendas)</option>
                                 <option value="deducao_receita">(-) Dedução da Receita Bruta</option>
                                 <option value="impostos">(-) Impostos sobre Vendas</option>
+                                <option value="receita_intercompany">(+) Receita Intercompany</option>
+                                <option value="ajuste_intercompany">(-) Ajuste Intercompany</option>
                                 <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
                                 <option value="verbas_comerciais">(+) Verbas Comerciais</option>
                                 <option value="comissoes">(-) Comissões sobre Vendas</option>
@@ -416,7 +418,8 @@
             }
 
             let acumuladoAno = {
-                receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
+                receita_bruta: 0, deducao_receita: 0, impostos: 0, 
+                receita_intercompany: 0, ajuste_intercompany: 0, receita_liquida: 0,
                 cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
                 comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
                 total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
@@ -429,7 +432,7 @@
                 }
             });
 
-            acumuladoAno.receita_liquida = acumuladoAno.receita_bruta - acumuladoAno.deducao_receita - acumuladoAno.impostos;
+            acumuladoAno.receita_liquida = acumuladoAno.receita_bruta - acumuladoAno.deducao_receita - acumuladoAno.impostos + acumuladoAno.receita_intercompany - acumuladoAno.ajuste_intercompany;
             acumuladoAno.lucro_bruto = acumuladoAno.receita_liquida - acumuladoAno.cmv;
             acumuladoAno.lucro_bruto_ajustado = acumuladoAno.lucro_bruto + acumuladoAno.verbas_comerciais;
             acumuladoAno.total_desp = acumuladoAno.comissoes + acumuladoAno.pessoal + acumuladoAno.comercial + acumuladoAno.pessoal_direta;
@@ -449,7 +452,6 @@
             const subTitulo = document.getElementById('subtitulo-dre');
 
             if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
-                // Se o usuário selecionou "TODOS" no filtro de ano estando no Lado a Lado, tratamos como 2026 ou o ano desejado
                 let anoFiltroLadoALado = filtroAnoAtivo !== "TODOS" ? filtroAnoAtivo : "2026";
 
                 document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - Visão Consolidada Lado a Lado (${anoFiltroLadoALado})`;
@@ -504,6 +506,8 @@
                 adicionarLinhaLadoALado("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
                 adicionarLinhaLadoALado("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
                 adicionarLinhaLadoALado("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaLadoALado("(+) Receita Intercompany", dm => dm.receita_intercompany, false, false);
+                adicionarLinhaLadoALado("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaLadoALado("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaLadoALado("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
                 adicionarLinhaLadoALado("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
@@ -519,7 +523,6 @@
                 adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else if (filtroAnoAtivo !== "TODOS") {
-                // VISÃO DE UM ANO ESPECÍFICO SELECIONADO NO FILTRO PARA UM FORNECEDOR ESPECÍFICO
                 document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${filtroAnoAtivo})`;
                 subTitulo.innerText = `Visão Individualizada do Exercício ${filtroAnoAtivo}`;
                 badgeContainer.innerText = `Base A.V.: Receita Líquida de ${filtroAnoAtivo} (100%)`;
@@ -554,6 +557,8 @@
                 adicionarLinhaUnica("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
                 adicionarLinhaUnica("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
                 adicionarLinhaUnica("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaUnica("(+) Receita Intercompany", dm => dm.receita_intercompany, false, false);
+                adicionarLinhaUnica("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaUnica("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaUnica("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
                 adicionarLinhaUnica("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
@@ -569,7 +574,6 @@
                 adicionarLinhaUnica("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else {
-                // VISÃO ANO A ANO PADRÃO PARA FORNECEDOR ESPECÍFICO (TODOS OS ANOS LADO A LADO)
                 document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
                 subTitulo.innerText = "Visão Comparativa Ano a Ano com Análise Vertical (%)";
                 badgeContainer.innerText = "Base A.V.: Receita Líquida do respectivo ano (100%)";
@@ -612,6 +616,8 @@
                 adicionarLinhaAnoAno("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
                 adicionarLinhaAnoAno("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
                 adicionarLinhaAnoAno("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaAnoAno("(+) Receita Intercompany", dm => dm.receita_intercompany, false, false);
+                adicionarLinhaAnoAno("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaAnoAno("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaAnoAno("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
                 adicionarLinhaAnoAno("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
