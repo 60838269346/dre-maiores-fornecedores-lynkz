@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRE por Canal - Visão por Ano e Acumulado</title>
+    <title>DRE por Canal - Visão Ano a Ano</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
-        /* Congela a primeira coluna da DRE ao rolar para a direita */
         .coluna-fixa {
             position: sticky;
             left: 0;
@@ -29,7 +28,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">DRE Individualizada por Fornecedor</h1>
-                    <p class="text-xs text-slate-400">Visão Anual, Análise Vertical e Acumulado (Nuvem Compartilhada)</p>
+                    <p class="text-xs text-slate-400">Visão Anual Comparativa (Ano a Ano) e Acumulado</p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -55,24 +54,16 @@
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Selecione o Fornecedor</h3>
                 <div id="canais-botoes" class="flex flex-wrap gap-2"></div>
             </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Exercício (Ano)</label>
-                <select id="filtro-ano" onchange="atualizarAnoFiltro()" class="border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                </select>
-            </div>
         </div>
 
         <div id="dre-container-export" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 gap-2">
                 <div>
                     <h2 id="titulo-dre-canal" class="font-bold text-slate-800 text-base">DRE - Fornecedor</h2>
-                    <p class="text-xs text-slate-500">Visão Anual, Análise Vertical (%) sobre a Receita Líquida e Acumulado do Ano</p>
+                    <p class="text-xs text-slate-500">Visão Comparativa Ano a Ano com Análise Vertical (%)</p>
                 </div>
                 <div id="badge-av-container" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
-                    Base A.V.: Receita Líquida do Fornecedor (100%)
+                    Base A.V.: Receita Líquida do respectivo ano (100%)
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -103,6 +94,7 @@
                             <option value="2026">2026</option>
                             <option value="2025">2025</option>
                             <option value="2024">2024</option>
+                            <option value="2023">2023</option>
                         </select>
                     </div>
                     <div>
@@ -185,7 +177,7 @@
         ];
 
         let canalAtivo = "BOEHRINGER";
-        let anoAtivo = "2026";
+        let anosLista = ["2023", "2024", "2025", "2026"];
         let lancamentos = [];
 
         async function carregarDadosDaNuvem() {
@@ -263,7 +255,7 @@
             document.getElementById('btn-cancelar-edicao').classList.add('hidden');
             document.getElementById('lanc-valor').value = "";
             document.getElementById('lanc-desc').value = "";
-            document.getElementById('lanc-ano').value = anoAtivo;
+            document.getElementById('lanc-ano').value = "2026";
             if (canalAtivo !== "CONSOLIDADO" && canalAtivo !== "CONSOLIDADO_LADO_A_LADO") {
                 document.getElementById('lanc-canal').value = canalAtivo;
             }
@@ -316,11 +308,6 @@
             });
         }
 
-        function atualizarAnoFiltro() {
-            anoAtivo = document.getElementById('filtro-ano').value;
-            calcularEAtualizarDRE();
-        }
-
         function toggleAdminModal() {
             const modal = document.getElementById('admin-modal');
             modal.classList.toggle('hidden');
@@ -345,7 +332,7 @@
                 tipo: String(tipo).trim(),
                 valor: Number(valor),
                 desc,
-                mes: "01", // Mês padrão fixo interno para manter a soma anual íntegra
+                mes: "01",
                 ano: String(ano)
             };
 
@@ -357,8 +344,6 @@
 
             await salvarDadosNaNuvem();
             limparFormularioEdicao();
-            document.getElementById('filtro-ano').value = ano;
-            anoAtivo = String(ano);
             canalAtivo = String(canal);
             renderizarBotoesCanais();
             calcularEAtualizarDRE();
@@ -440,22 +425,14 @@
 
         function calcularEAtualizarDRE() {
             const objCanalAtivo = canais.find(c => c.id === canalAtivo) || canais[0];
-            document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${anoAtivo})`;
-            
-            const badgeContainer = document.getElementById('badge-av-container');
-            if (canalAtivo === "CONSOLIDADO") {
-                badgeContainer.innerText = "Base A.V.: Receita Líquida Consolidada (100%)";
-            } else if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
-                badgeContainer.innerText = "Visão Lado a Lado: Todos os Fornecedores | Consolidado (Com A.V. individual)";
-            } else {
-                badgeContainer.innerText = "Base A.V.: Receita Líquida do Fornecedor (100%)";
-            }
+            document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
 
             const theadTr = document.getElementById('dre-thead-tr');
             const tbody = document.getElementById('dre-table-body');
             tbody.innerHTML = '';
 
             if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
+                // Mantém consolidado lado a lado de fornecedores se desejado
                 let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
                 const canaisComparacao = [
                     "BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", 
@@ -468,14 +445,14 @@
                 };
                 
                 canaisComparacao.forEach(idC => {
-                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]}</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]} (2026)</th>`;
                     theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.</th>`;
                 });
                 theadTr.innerHTML = theadHtml;
 
                 let dadosCanais = {};
                 canaisComparacao.forEach(idC => {
-                    dadosCanais[idC] = calcularDadosCanalParaAno(idC, anoAtivo).acumuladoAno;
+                    dadosCanais[idC] = calcularDadosCanalParaAno(idC, "2026").acumuladoAno;
                 });
 
                 function adicionarLinhaLadoALado(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
@@ -519,63 +496,72 @@
                 adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
             } else {
-                theadTr.innerHTML = `
-                    <th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
-                    <th class="py-3 px-4 text-right bg-slate-100">Valor Anual (${anoAtivo})</th>
-                    <th class="py-3 px-4 text-right bg-slate-100">A.V. (%)</th>
-                `;
+                // VISÃO ANO A ANO (2023, 2024, 2025, 2026 lado a lado) para o fornecedor ativo
+                let theadHtml = '<th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
+                anosLista.forEach(ano => {
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${ano}</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V. (%)</th>`;
+                });
+                theadTr.innerHTML = theadHtml;
 
-                let dadosAno = calcularDadosCanalParaAno(canalAtivo, anoAtivo).acumuladoAno;
-                let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
+                let dadosAnosObj = {};
+                anosLista.forEach(ano => {
+                    dadosAnosObj[ano] = calcularDadosCanalParaAno(canalAtivo, ano).acumuladoAno;
+                });
 
-                function adicionarLinhaDRE(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                function adicionarLinhaAnoAno(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
                     let tr = document.createElement('tr');
                     if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
                     else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
                     else tr.className = 'hover:bg-slate-50/80 transition';
 
-                    let val = seletorValor(dadosAno);
-                    let av = (val / baseAV) * 100;
-                    let valExibicao = forcarParenteses && val > 0 ? -val : val;
+                    let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
+                    anosLista.forEach(ano => {
+                        let dadosAno = dadosAnosObj[ano];
+                        let val = seletorValor(dadosAno);
+                        let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
+                        let av = (val / baseAV) * 100;
+                        let valExibicao = forcarParenteses && val > 0 ? -val : val;
 
-                    tr.innerHTML = `
-                        <td class="px-4 py-2.5 coluna-fixa">${nome}</td>
-                        <td class="py-2.5 px-4 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
-                        <td class="py-2.5 px-4 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
-                    `;
+                        html += `
+                            <td class="py-2.5 px-2 text-right border-l border-slate-200">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                            <td class="py-2.5 px-2 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                        `;
+                    });
+                    tr.innerHTML = html;
                     tbody.appendChild(tr);
                 }
 
-                adicionarLinhaDRE("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
-                adicionarLinhaDRE("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
-                adicionarLinhaDRE("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
-                adicionarLinhaDRE("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
-                adicionarLinhaDRE("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
-                adicionarLinhaDRE("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
-                adicionarLinhaDRE("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
-                adicionarLinhaDRE("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
-                adicionarLinhaDRE("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
-                adicionarLinhaDRE("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
-                adicionarLinhaDRE("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
-                adicionarLinhaDRE("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
-                adicionarLinhaDRE("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
-                adicionarLinhaDRE("(=) EBITDA", dm => dm.ebitda, false, true);
-                adicionarLinhaDRE("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
-                adicionarLinhaDRE("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
+                adicionarLinhaAnoAno("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
+                adicionarLinhaAnoAno("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
+                adicionarLinhaAnoAno("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaAnoAno("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaAnoAno("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaAnoAno("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaAnoAno("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaAnoAno("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaAnoAno("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
+                adicionarLinhaAnoAno("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
+                adicionarLinhaAnoAno("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
+                adicionarLinhaAnoAno("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
+                adicionarLinhaAnoAno("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
+                adicionarLinhaAnoAno("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaAnoAno("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaAnoAno("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
             }
         }
 
         function exportarExcel() {
             let tabela = document.getElementById("tabela-dre-dados");
-            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE Anual" });
-            XLSX.writeFile(wb, `DRE_${canalAtivo}_${anoAtivo}.xlsx`);
+            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE Ano a Ano" });
+            XLSX.writeFile(wb, `DRE_${canalAtivo}_Ano_a_Ano.xlsx`);
         }
 
         function exportarPDF() {
             const elemento = document.getElementById("dre-container-export");
             const opt = {
                 margin:       10,
-                filename:     `DRE_${canalAtivo}_${anoAtivo}.pdf`,
+                filename:     `DRE_${canalAtivo}_Ano_a_Ano.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
