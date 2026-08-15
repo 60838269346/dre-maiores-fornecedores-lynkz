@@ -4,14 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DRE por Canal - Visão Ano a Ano e Filtro</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (XLSX) para exportação Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Supabase Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
         .coluna-fixa {
             position: sticky;
@@ -26,507 +20,630 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans" onload="carregarDadosDaNuvem()">
 
-    <!-- Header -->
     <header class="bg-slate-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-chart-line text-2xl text-blue-400"></i>
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-600 p-2.5 rounded-lg text-white">
+                    <i class="fa-solid fa-chart-pie text-xl"></i>
+                </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight">DRE Gerencial por Canal</h1>
-                    <p class="text-xs text-slate-400">Análise de Desempenho e Maiores Fornecedores</p>
+                    <h1 class="text-xl font-bold tracking-tight">DRE Individualizada por Fornecedor</h1>
+                    <p class="text-xs text-slate-400">Visão Anual Comparativa e Filtro por Exercício</p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <span id="statusNuvem" class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5">
-                    <i class="fa-solid fa-circle text-[8px] text-amber-400" id="statusDot"></i> <span id="statusText">Modo Local</span>
-                </span>
-                <button onclick="salvarDadosNaNuvem()" id="btnSalvar" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> Salvar na Nuvem
+                <button onclick="exportarExcel()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-xs font-medium transition shadow-sm flex items-center space-x-1.5">
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                    <span>Baixar Excel</span>
                 </button>
-                <button onclick="exportarExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-file-excel"></i> Exportar Excel
+                <button onclick="exportarPDF()" class="bg-slate-700 hover:bg-slate-600 text-white px-3 py-2 rounded-lg text-xs font-medium transition shadow-sm flex items-center space-x-1.5">
+                    <i class="fa-solid fa-file-pdf text-red-400"></i>
+                    <span>Baixar PDF</span>
+                </button>
+                <button onclick="tentarAbrirAdmin()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Painel de Lançamentos</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        
-        <!-- Filtros e Controles -->
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between">
-            <div class="flex flex-wrap gap-3 items-center">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Filtrar por Canal</label>
-                    <select id="filtroCanal" onchange="renderizarDRE()" class="bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
-                        <option value="TODOS">Todos os Canais</option>
-                    </select>
-                </div>
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Selecione o Fornecedor</h3>
+                <div id="canais-botoes" class="flex flex-wrap gap-2"></div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="abrirModalConfig()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm px-4 py-2 rounded-lg transition border border-slate-300 flex items-center gap-2">
-                    <i class="fa-solid fa-gear"></i> Configurar Banco de Dados
-                </button>
-                <button onclick="abrirModalGerenciar()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-table-list"></i> Gerenciar Dados & Fornecedores
-                </button>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Exercício (Ano / Visão)</label>
+                <select id="filtro-ano" onchange="atualizarAnoFiltro()" class="border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                    <option value="TODOS">📊 Visão Ano a Ano (Todos)</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
             </div>
         </div>
 
-        <!-- Tabela DRE -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div id="dre-container-export" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 gap-2">
+                <div>
+                    <h2 id="titulo-dre-canal" class="font-bold text-slate-800 text-base">DRE - Fornecedor</h2>
+                    <p id="subtitulo-dre" class="text-xs text-slate-500">Visão Comparativa Ano a Ano com Análise Vertical (%)</p>
+                </div>
+                <div id="badge-av-container" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
+                    Base A.V.: Receita Líquida do respectivo ano (100%)
+                </div>
+            </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse" id="tabelaDRE">
-                    <thead class="bg-slate-100 text-slate-700 uppercase text-xs font-semibold tracking-wider border-b border-slate-200">
-                        <tr id="cabecalhoAnos">
-                            <th class="py-3 px-4 coluna-fixa z-30">Conta / Descrição</th>
-                        </tr>
+                <table id="tabela-dre-dados" class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr id="dre-thead-tr" class="bg-slate-100/70 text-slate-700 font-semibold border-b border-slate-200"></tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-sm" id="corpoDRE">
-                        <!-- Preenchido via JavaScript -->
-                    </tbody>
+                    <tbody id="dre-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
                 </table>
             </div>
         </div>
-
     </main>
 
-    <!-- Modal Configuração Supabase -->
-    <div id="modalConfig" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200">
-            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-database text-blue-400"></i> Configurar Supabase</h3>
-                <button onclick="fecharModalConfig()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- Modal do Painel de Lançamentos -->
+    <div id="admin-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 bg-slate-900 text-white flex justify-between items-center shrink-0">
+                <h3 id="modal-titulo-texto" class="font-bold text-base"><i class="fa-solid fa-pen-to-square mr-2"></i> Painel de Lançamentos DRE</h3>
+                <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-500">Insira as credenciais do seu projeto Supabase para sincronizar os dados da DRE e dos maiores fornecedores na nuvem.</p>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Supabase URL</label>
-                    <input type="text" id="supabaseUrlInput" placeholder="https://seu-projeto.supabase.co" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
+            <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                <input type="hidden" id="lanc-index-editando" value="-1">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <h4 id="form-titulo-painel" class="text-xs font-bold text-slate-700 uppercase tracking-wide">Novo Lançamento Anual</h4>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Exercício (Ano)</label>
+                        <select id="lanc-ano" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Selecione o Fornecedor</label>
+                        <select id="lanc-canal" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="BOEHRINGER">BOEHRINGER</option>
+                            <option value="PREMIER">PREMIER</option>
+                            <option value="OURO FINO">OURO FINO</option>
+                            <option value="ORGANACT PET">ORGANACT PET</option>
+                            <option value="AVERT">AVERT</option>
+                            <option value="VANSIL">VANSIL</option>
+                            <option value="MUNDO ANIMAL">MUNDO ANIMAL</option>
+                            <option value="FARMINA">FARMINA</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Linha na DRE</label>
+                            <select id="lanc-tipo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <option value="receita_bruta">Receita Bruta (Vendas)</option>
+                                <option value="deducao_receita">(-) Dedução da Receita Bruta</option>
+                                <option value="impostos">(-) Impostos sobre Vendas</option>
+                                <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
+                                <option value="verbas_comerciais">(+) Verbas Comerciais</option>
+                                <option value="comissoes">(-) Comissões sobre Vendas</option>
+                                <option value="pessoal">(-) Gastos com Pessoal</option>
+                                <option value="comercial">(-) Despesas Comerciais</option>
+                                <option value="pessoal_direta">(-) Despesas com Pessoal Direta</option>
+                                <option value="corporativas_indiretas">(-) Despesas Corporativas Indiretas</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor Anual (R$)</label>
+                            <input type="text" id="lanc-valor" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descrição / Histórico</label>
+                        <input type="text" id="lanc-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none" placeholder="Ex: Faturamento anual...">
+                    </div>
+                    <div class="flex justify-end space-x-2 pt-1">
+                        <button id="btn-cancelar-edicao" onclick="limparFormularioEdicao()" class="hidden px-3 py-1.5 border border-slate-300 text-slate-600 rounded-lg text-xs font-medium hover:bg-slate-100">Cancelar Edição</button>
+                        <button onclick="salvarLancamento()" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 shadow-sm">Salvar Lançamento</button>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Supabase Anon Key</label>
-                    <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div class="pt-2 flex justify-end gap-2">
-                    <button onclick="fecharModalConfig()" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100">Cancelar</button>
-                    <button onclick="salvarConfigSupabase()" class="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm">Salvar e Conectar</button>
+                <div class="space-y-3">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b border-slate-200 pb-2">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase">Lançamentos Cadastrados</h4>
+                        <div class="flex items-center gap-2">
+                            <button onclick="tentarLimparHistorico()" class="text-xs text-red-600 hover:text-red-800 font-semibold flex items-center gap-1 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition">
+                                <i class="fa-solid fa-trash-can"></i> Limpar Tudo
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lista-lancamentos-recentes" class="max-h-56 overflow-y-auto space-y-1.5 text-xs text-slate-600 pr-1"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Gerenciamento Avançado de Dados e Fornecedores -->
-    <div id="modalGerenciar" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-slate-200">
-            <div class="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shrink-0">
-                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-table-list text-indigo-400"></i> Gerenciador de Contas, Valores e Maiores Fornecedores</h3>
-                <button onclick="fecharModalGerenciar()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto space-y-6 flex-1">
-                <!-- Abas internas -->
-                <div class="flex border-b border-slate-200 gap-4">
-                    <button onclick="mudarAbaModal('dre')" id="btnAbaDRE" class="pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition">Estrutura e Valores DRE</button>
-                    <button onclick="mudarAbaModal('fornecedores')" id="btnAbaFornecedores" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition">Maiores Fornecedores por Canal</button>
-                </div>
-
-                <!-- Conteúdo Aba DRE -->
-                <div id="conteudoAbaDRE" class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <p class="text-xs text-slate-500">Adicione, remova ou edite as linhas da DRE e seus respectivos valores por canal e ano.</p>
-                        <button onclick="adicionarLinhaDRE()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus text-blue-600"></i> Adicionar Conta
-                        </button>
-                    </div>
-                    <div id="listaContasDREModal" class="space-y-3">
-                        <!-- Preenchido via JS -->
-                    </div>
-                </div>
-
-                <!-- Conteúdo Aba Fornecedores -->
-                <div id="conteudoAbaFornecedores" class="space-y-4 hidden">
-                    <div class="flex justify-between items-center">
-                        <p class="text-xs text-slate-500">Gerencie os maiores fornecedores detalhados por canal e ano.</p>
-                        <button onclick="adicionarFornecedorModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus text-indigo-600"></i> Adicionar Fornecedor
-                        </button>
-                    </div>
-                    <div id="listaFornecedoresModal" class="space-y-3">
-                        <!-- Preenchido via JS -->
-                    </div>
-                </div>
-            </div>
-            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0">
-                <button onclick="fecharModalGerenciar()" class="px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-200">Cancelar</button>
-                <button onclick="salvarAlteracoesModal()" class="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm">Aplicar Alterações</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Script Principal -->
+    <!-- Bibliotecas externas para Excel e PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <script>
-        // Dados Padrão Iniciais Originais (sem alteração de contas)
-        let dadosDRE = {
-            canais: ["Canal A", "Canal B", "Canal C"],
-            anos: [2024, 2025, 2026],
-            contas: [
-                { nome: "Receita Bruta", tipo: "receita", valores: { "Canal A": { 2024: 1000000, 2025: 1200000, 2026: 1500000 }, "Canal B": { 2024: 800000, 2025: 950000, 2026: 1100000 }, "Canal C": { 2024: 500000, 2025: 600000, 2026: 750000 } } },
-                { nome: "Deduções da Receita Bruta", tipo: "deducao", valores: { "Canal A": { 2024: -100000, 2025: -120000, 2026: -150000 }, "Canal B": { 2024: -80000, 2025: -95000, 2026: -110000 }, "Canal C": { 2024: -50000, 2025: -60000, 2026: -75000 } } },
-                { nome: "Receita Líquida", tipo: "total", calculo: true },
-                { nome: "CPV / CMV", tipo: "custo", valores: { "Canal A": { 2024: -400000, 2025: -480000, 2026: -600000 }, "Canal B": { 2024: -320000, 2025: -380000, 2026: -440000 }, "Canal C": { 2024: -200000, 2025: -240000, 2026: -300000 } } },
-                { nome: "Lucro Bruto", tipo: "total", calculo: true },
-                { nome: "Despesas Operacionais", tipo: "despesa", valores: { "Canal A": { 2024: -300000, 2025: -350000, 2026: -400000 }, "Canal B": { 2024: -250000, 2025: -280000, 2026: -320000 }, "Canal C": { 2024: -150000, 2025: -180000, 2026: -200000 } } },
-                { nome: "EBITDA / LAJIDA", tipo: "total", calculo: true }
-            ],
-            fornecedores: [
-                { nome: "Fornecedor Alpha S.A.", canal: "Canal A", ano: 2025, valor: 250000 },
-                { nome: "Fornecedor Beta Ltda", canal: "Canal A", ano: 2025, valor: 180000 },
-                { nome: "Gamma Distribuidora", canal: "Canal B", ano: 2025, valor: 210000 },
-                { nome: "Delta Suprimentos", canal: "Canal C", ano: 2025, valor: 150000 }
-            ]
-        };
+        const BIN_ID = "6a60f751da38895dfe805e30";
+        const API_KEY = "$2a$10$2gRuysiXM85zMZ4OTG2dU.AEaN0WyPHJveZ2wy62/tqidY73EOJBS";
 
-        let supabaseUrl = localStorage.getItem('supabase_url') || "";
-        let supabaseKey = localStorage.getItem('supabase_key') || "";
-        let supabaseClient = null;
+        const canais = [
+            { id: "BOEHRINGER", nome: "BOEHRINGER" },
+            { id: "PREMIER", nome: "PREMIER" },
+            { id: "OURO FINO", nome: "OURO FINO" },
+            { id: "ORGANACT PET", nome: "ORGANACT PET" },
+            { id: "AVERT", nome: "AVERT" },
+            { id: "VANSIL", nome: "VANSIL" },
+            { id: "MUNDO ANIMAL", nome: "MUNDO ANIMAL" },
+            { id: "FARMINA", nome: "FARMINA" },
+            { id: "CONSOLIDADO", nome: "CONSOLIDADO (TOTAL)" },
+            { id: "CONSOLIDADO_LADO_A_LADO", nome: "📊 CONSOLIDADO LADO A LADO" }
+        ];
 
-        if (supabaseUrl && supabaseKey) {
+        let canalAtivo = "BOEHRINGER";
+        let filtroAnoAtivo = "TODOS";
+        let anosLista = ["2023", "2024", "2025", "2026"];
+        let lancamentos = [];
+
+        async function carregarDadosDaNuvem() {
             try {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-            } catch (e) {
-                console.error("Erro ao iniciar Supabase", e);
-            }
-        }
-
-        function atualizarStatusNuvem(conectado, modo) {
-            const dot = document.getElementById('statusDot');
-            const text = document.getElementById('statusText');
-            if (conectado) {
-                dot.className = "fa-solid fa-circle text-[8px] text-emerald-400";
-                text.textContent = modo;
-            } else {
-                dot.className = "fa-solid fa-circle text-[8px] text-amber-400";
-                text.textContent = "Modo Local";
-            }
-        }
-
-        function formatarMoeda(valor) {
-            return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
-        function carregarDadosDaNuvem() {
-            const localData = localStorage.getItem('dados_dre_completo');
-            if (localData) {
-                try {
-                    dadosDRE = JSON.parse(localData);
-                } catch (e) {
-                    console.error("Erro ao ler dados locais", e);
-                }
-            }
-            popularFiltros();
-            renderizarDRE();
-            if (supabaseClient) {
-                sincronizarComSupabase(false);
-            }
-        }
-
-        function popularFiltros() {
-            const select = document.getElementById('filtroCanal');
-            const canalAtual = select.value;
-            select.innerHTML = '<option value="TODOS">Todos os Canais</option>';
-            dadosDRE.canais.forEach(canal => {
-                let opt = document.createElement('option');
-                opt.value = canal;
-                opt.textContent = canal;
-                if (canal === canalAtual) opt.selected = true;
-                select.appendChild(opt);
-            });
-        }
-
-        function renderizarDRE() {
-            const canalSelecionado = document.getElementById('filtroCanal').value;
-            const anos = dadosDRE.anos;
-
-            // Cabeçalho
-            let trCabecalho = `<th class="py-3 px-4 coluna-fixa z-30">Conta / Descrição</th>`;
-            anos.forEach(ano => {
-                trCabecalho += `<th class="py-3 px-4 text-right">${ano}</th>`;
-            });
-            document.getElementById('cabecalhoAnos').innerHTML = trCabecalho;
-
-            // Corpo
-            let corpoHTML = "";
-            let receitasAcumuladasPorAno = {};
-            let lucroBrutoAcumuladoPorAno = {};
-            anos.forEach(ano => {
-                receitasAcumuladasPorAno[ano] = 0;
-                lucroBrutoAcumuladoPorAno[ano] = 0;
-            });
-
-            dadosDRE.contas.forEach(conta => {
-                let valoresAno = {};
-                anos.forEach(ano => {
-                    let totalAno = 0;
-                    let canaisAlvo = canalSelecionado === "TODOS" ? dadosDRE.canais : [canalSelecionado];
-                    
-                    if (!conta.calculo) {
-                        canaisAlvo.forEach(c => {
-                            if (conta.valores && conta.valores[c] && conta.valores[c][ano]) {
-                                totalAno += Number(conta.valores[c][ano]);
-                            }
-                        });
-                        valoresAno[ano] = totalAno;
-
-                        // Acumula para Receita Líquida (considera tudo antes de CPV)
-                        if (conta.nome !== "CPV / CMV" && conta.nome !== "Despesas Operacionais" && conta.nome !== "Lucro Bruto" && conta.nome !== "EBITDA / LAJIDA") {
-                            receitasAcumuladasPorAno[ano] += totalAno;
-                        }
-                    } else {
-                        if (conta.nome === "Receita Líquida") {
-                            valoresAno[ano] = receitasAcumuladasPorAno[ano];
-                        } else if (conta.nome === "Lucro Bruto") {
-                            let cpvTotal = 0;
-                            let contaCpv = dadosDRE.contas.find(c => c.nome === "CPV / CMV");
-                            if (contaCpv) {
-                                canaisAlvo.forEach(c => {
-                                    if (contaCpv.valores && contaCpv.valores[c] && contaCpv.valores[c][ano]) {
-                                        cpvTotal += Number(contaCpv.valores[c][ano]);
-                                    }
-                                });
-                            }
-                            valoresAno[ano] = receitasAcumuladasPorAno[ano] + cpvTotal;
-                            lucroBrutoAcumuladoPorAno[ano] = valoresAno[ano];
-                        } else if (conta.nome === "EBITDA / LAJIDA") {
-                            let despesaTotal = 0;
-                            let contaDesp = dadosDRE.contas.find(c => c.nome === "Despesas Operacionais");
-                            if (contaDesp) {
-                                canaisAlvo.forEach(c => {
-                                    if (contaDesp.valores && contaDesp.valores[c] && contaDesp.valores[c][ano]) {
-                                        despesaTotal += Number(contaDesp.valores[c][ano]);
-                                    }
-                                });
-                            }
-                            valoresAno[ano] = lucroBrutoAcumuladoPorAno[ano] + despesaTotal;
-                        }
+                let resposta = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                if (resposta.ok) {
+                    let resultado = await resposta.json();
+                    if (resultado.record && Array.isArray(resultado.record.lancamentos)) {
+                        lancamentos = resultado.record.lancamentos;
                     }
-                });
+                }
+            } catch (e) {
+                console.error("Erro ao carregar da nuvem, usando dados vazios.", e);
+            }
+            renderizarBotoesCanais();
+            calcularEAtualizarDRE();
+        }
 
-                let isTotal = conta.calculo;
-                let classeLinha = isTotal ? "font-bold bg-slate-100 text-slate-900 border-t border-b border-slate-200" : "hover:bg-slate-50";
-
-                corpoHTML += `<tr class="${classeLinha}">`;
-                corpoHTML += `<td class="py-3 px-4 coluna-fixa">${conta.nome}</td>`;
-                anos.forEach(ano => {
-                    let val = valoresAno[ano];
-                    let corTexto = val < 0 ? "text-red-600" : "";
-                    corpoHTML += `<td class="py-3 px-4 text-right ${corTexto}">${formatarMoeda(val)}</td>`;
+        async function salvarDadosNaNuvem() {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ lancamentos: lancamentos })
                 });
-                corpoHTML += `</tr>`;
+            } catch (e) {
+                console.error("Erro ao salvar na nuvem.", e);
+            }
+        }
+
+        function tentarLimparHistorico() {
+            let senha = prompt("Ação restrita! Digite a senha para confirmar a limpeza total do histórico:");
+            if (senha === "0") {
+                if (confirm("Tem certeza absoluta? Todos os lançamentos salvos na nuvem serão apagados permanentemente.")) {
+                    limparHistoricoNuvem();
+                }
+            } else if (senha !== null) {
+                alert("Senha incorreta! A limpeza foi cancelada.");
+            }
+        }
+
+        async function limparHistoricoNuvem() {
+            lancamentos = [];
+            await salvarDadosNaNuvem();
+            limparFormularioEdicao();
+            renderizarLancamentosRecentes();
+            calcularEAtualizarDRE();
+            alert("Histórico limpo com sucesso!");
+        }
+
+        function tentarAbrirAdmin() {
+            let senha = prompt("Acesso restrito. Digite a senha para abrir o painel de lançamentos:");
+            if (senha === "0") {
+                abrirPainelAdmin();
+            } else if (senha !== null) {
+                alert("Senha incorreta! Apenas você pode gerenciar lançamentos.");
+            }
+        }
+
+        function abrirPainelAdmin() {
+            limparFormularioEdicao();
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            renderizarLancamentosRecentes();
+        }
+
+        function limparFormularioEdicao() {
+            document.getElementById('lanc-index-editando').value = "-1";
+            document.getElementById('form-titulo-painel').innerText = "Novo Lançamento Anual";
+            document.getElementById('btn-cancelar-edicao').classList.add('hidden');
+            document.getElementById('lanc-valor').value = "";
+            document.getElementById('lanc-desc').value = "";
+            document.getElementById('lanc-ano').value = "2026";
+            if (canalAtivo !== "CONSOLIDADO" && canalAtivo !== "CONSOLIDADO_LADO_A_LADO") {
+                document.getElementById('lanc-canal').value = canalAtivo;
+            }
+        }
+
+        function abrirEdicaoNoPainel(realIdx) {
+            let l = lancamentos[realIdx];
+            if (!l) return;
+            document.getElementById('lanc-index-editando').value = realIdx;
+            document.getElementById('form-titulo-painel').innerText = "Editando Lançamento (Índice #" + realIdx + ")";
+            document.getElementById('btn-cancelar-edicao').classList.remove('hidden');
+            document.getElementById('lanc-ano').value = l.ano || "2026";
+            document.getElementById('lanc-canal').value = l.canal || "BOEHRINGER";
+            document.getElementById('lanc-tipo').value = l.tipo || "receita_bruta";
+            document.getElementById('lanc-valor').value = l.valor;
+            document.getElementById('lanc-desc').value = l.desc || "";
+            const modalBody = document.querySelector('#admin-modal .overflow-y-auto');
+            if (modalBody) modalBody.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function formatarMoeda(valor, isTotalizador = false) {
+            let absVal = Math.abs(valor);
+            let formatado = absVal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let textoFinal = valor < 0 ? `(${formatado})` : formatado;
+            if (isTotalizador) {
+                return `<span class="font-bold">${textoFinal}</span>`;
+            }
+            return `<span class="font-medium">${textoFinal}</span>`;
+        }
+
+        function formatarPercentual(valor, isTotalizador = false) {
+            let formatado = valor.toFixed(2).replace('.', ',') + '%';
+            return isTotalizador ? `<span class="font-bold">${formatado}</span>` : formatado;
+        }
+
+        function renderizarBotoesCanais() {
+            const container = document.getElementById('canais-botoes');
+            container.innerHTML = '';
+            canais.forEach(c => {
+                let btn = document.createElement('button');
+                let isActive = c.id === canalAtivo;
+                btn.className = `px-4 py-2.5 rounded-lg text-xs font-bold transition shadow-sm flex items-center space-x-2 ${isActive ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`;
+                btn.innerHTML = `<span>${c.nome}</span>`;
+                btn.onclick = () => {
+                    canalAtivo = c.id;
+                    renderizarBotoesCanais();
+                    calcularEAtualizarDRE();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function atualizarAnoFiltro() {
+            filtroAnoAtivo = document.getElementById('filtro-ano').value;
+            calcularEAtualizarDRE();
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        async function salvarLancamento() {
+            const ano = document.getElementById('lanc-ano').value;
+            const canal = document.getElementById('lanc-canal').value;
+            const tipo = document.getElementById('lanc-tipo').value;
+            let valorStr = document.getElementById('lanc-valor').value.trim().replace(',', '.');
+            let valor = parseFloat(valorStr);
+            const desc = document.getElementById('lanc-desc').value || "Lançamento DRE Anual";
+            const indexEditando = parseInt(document.getElementById('lanc-index-editando').value);
+
+            if (isNaN(valor) || valor <= 0) {
+                alert('Por favor, informe um valor numérico válido.');
+                return;
+            }
+
+            let novoObj = {
+                canal: String(canal).trim(),
+                tipo: String(tipo).trim(),
+                valor: Number(valor),
+                desc,
+                mes: "01",
+                ano: String(ano)
+            };
+
+            if (indexEditando >= 0 && indexEditando < lancamentos.length) {
+                lancamentos[indexEditando] = novoObj;
+            } else {
+                lancamentos.push(novoObj);
+            }
+
+            await salvarDadosNaNuvem();
+            limparFormularioEdicao();
+            canalAtivo = String(canal);
+            renderizarBotoesCanais();
+            calcularEAtualizarDRE();
+            renderizarLancamentosRecentes();
+        }
+
+        async function removerLancamento(index) {
+            if (confirm("Deseja realmente excluir este lançamento?")) {
+                lancamentos.splice(index, 1);
+                await salvarDadosNaNuvem();
+                limparFormularioEdicao();
+                renderizarLancamentosRecentes();
+                calcularEAtualizarDRE();
+            }
+        }
+
+        function renderizarLancamentosRecentes() {
+            const container = document.getElementById('lista-lancamentos-recentes');
+            container.innerHTML = '';
+
+            if (lancamentos.length === 0) {
+                container.innerHTML = '<p class="text-slate-400 py-2">Nenhum lançamento registrado.</p>';
+                return;
+            }
+
+            lancamentos.slice().reverse().forEach((l, idx) => {
+                const realIdx = lancamentos.length - 1 - idx;
+                const canalObj = canais.find(c => c.id === l.canal);
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 gap-2 shadow-xs';
+                div.innerHTML = `
+                    <div class="truncate">
+                        <span class="inline-block bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded mr-1">Ano: ${l.ano}</span>
+                        <strong>${canalObj?.nome || l.canal}</strong> - <span class="text-slate-500">${l.tipo}</span>: <span class="font-semibold text-slate-800">${formatarMoeda(l.valor)}</span>
+                        ${l.desc ? `<div class="text-slate-400 text-[10px] truncate">${l.desc}</div>` : ''}
+                    </div>
+                    <div class="flex items-center space-x-1.5 shrink-0">
+                        <button onclick="abrirEdicaoNoPainel(${realIdx})" class="text-blue-500 hover:text-blue-700 p-1.5 bg-blue-50 hover:bg-blue-100 rounded transition" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="removerLancamento(${realIdx})" class="text-red-500 hover:text-red-700 p-1.5 bg-red-50 hover:bg-red-100 rounded transition" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function calcularDadosCanalParaAno(nomeCanal, ano) {
+            let lancsCanalAno = [];
+            const fornecedoresOficiais = ["BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", "AVERT", "VANSIL", "MUNDO ANIMAL", "FARMINA"];
+
+            if (nomeCanal === "CONSOLIDADO") {
+                lancsCanalAno = lancamentos.filter(l => l.ano === ano && fornecedoresOficiais.includes(l.canal));
+            } else {
+                lancsCanalAno = lancamentos.filter(l => l.canal === nomeCanal && l.ano === ano);
+            }
+
+            let acumuladoAno = {
+                receita_bruta: 0, deducao_receita: 0, impostos: 0, receita_liquida: 0,
+                cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
+                comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
+                total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
+            };
+
+            lancsCanalAno.forEach(l => {
+                let t = l.tipo;
+                if (acumuladoAno[t] !== undefined) {
+                    acumuladoAno[t] += Number(l.valor);
+                }
             });
 
-            // Seção de Maiores Fornecedores
-            corpoHTML += `<tr class="bg-indigo-50/60 font-semibold text-indigo-900 border-t-2 border-indigo-200"><td colspan="${anos.length + 1}" class="py-2.5 px-4"><i class="fa-solid fa-truck-field mr-2"></i> Maiores Fornecedores</td></tr>`;
-            
-            let fornecedoresFiltrados = dadosDRE.fornecedores.filter(f => canalSelecionado === "TODOS" || f.canal === canalSelecionado);
-            if (fornecedoresFiltrados.length === 0) {
-                corpoHTML += `<tr><td colspan="${anos.length + 1}" class="py-3 px-4 text-slate-400 italic text-center">Nenhum fornecedor cadastrado para este filtro.</td></tr>`;
-            } else {
-                // Agrupa por fornecedor
-                let mapFornec = {};
-                fornecedoresFiltrados.forEach(f => {
-                    if (!mapFornec[f.nome]) mapFornec[f.nome] = {};
-                    anos.forEach(ano => {
-                        if (!mapFornec[f.nome][ano]) mapFornec[f.nome][ano] = 0;
-                        if (f.ano === ano) mapFornec[f.nome][ano] += Number(f.valor);
-                    });
-                });
+            acumuladoAno.receita_liquida = acumuladoAno.receita_bruta - acumuladoAno.deducao_receita - acumuladoAno.impostos;
+            acumuladoAno.lucro_bruto = acumuladoAno.receita_liquida - acumuladoAno.cmv;
+            acumuladoAno.lucro_bruto_ajustado = acumuladoAno.lucro_bruto + acumuladoAno.verbas_comerciais;
+            acumuladoAno.total_desp = acumuladoAno.comissoes + acumuladoAno.pessoal + acumuladoAno.comercial + acumuladoAno.pessoal_direta;
+            acumuladoAno.ebitda = acumuladoAno.lucro_bruto_ajustado - acumuladoAno.total_desp;
+            acumuladoAno.ebitda_ajustado = acumuladoAno.ebitda - acumuladoAno.corporativas_indiretas;
 
-                Object.keys(mapFornec).forEach(nomeForn => {
-                    corpoHTML += `<tr class="hover:bg-slate-50">`;
-                    corpoHTML += `<td class="py-2.5 px-4 coluna-fixa text-slate-600 font-normal pl-8">• ${nomeForn}</td>`;
-                    anos.forEach(ano => {
-                        let val = mapFornec[nomeForn][ano] || 0;
-                        corpoHTML += `<td class="py-2.5 px-4 text-right text-slate-600">${val > 0 ? formatarMoeda(val) : '-'}</td>`;
-                    });
-                    corpoHTML += `</tr>`;
-                });
-            }
-
-            document.getElementById('corpoDRE').innerHTML = corpoHTML;
+            return { acumuladoAno };
         }
 
-        function salvarDadosNaNuvem() {
-            localStorage.setItem('dados_dre_completo', JSON.stringify(dadosDRE));
-            if (supabaseClient) {
-                sincronizarComSupabase(true);
-            } else {
-                alert("Dados salvos localmente com sucesso!");
-            }
-        }
+        function calcularEAtualizarDRE() {
+            const objCanalAtivo = canais.find(c => c.id === canalAtivo) || canais[0];
+            const theadTr = document.getElementById('dre-thead-tr');
+            const tbody = document.getElementById('dre-table-body');
+            tbody.innerHTML = '';
 
-        async function sincronizarComSupabase(mostrarAlerta) {
-            atualizarStatusNuvem(true, "Sincronizando...");
-            setTimeout(() => {
-                atualizarStatusNuvem(true, "Conectado à Nuvem");
-                if (mostrarAlerta) alert("Dados salvos e sincronizados com sucesso!");
-            }, 800);
+            const badgeContainer = document.getElementById('badge-av-container');
+            const subTitulo = document.getElementById('subtitulo-dre');
+
+            if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
+                // Se o usuário selecionou "TODOS" no filtro de ano estando no Lado a Lado, tratamos como 2026 ou o ano desejado
+                let anoFiltroLadoALado = filtroAnoAtivo !== "TODOS" ? filtroAnoAtivo : "2026";
+
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - Visão Consolidada Lado a Lado (${anoFiltroLadoALado})`;
+                subTitulo.innerText = `Comparativo entre todos os fornecedores referentes ao exercício ${anoFiltroLadoALado}`;
+                badgeContainer.innerText = `Visão Lado a Lado por Fornecedor (${anoFiltroLadoALado})`;
+
+                let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
+                const canaisComparacao = [
+                    "BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", 
+                    "AVERT", "VANSIL", "MUNDO ANIMAL", "FARMINA", "CONSOLIDADO"
+                ];
+                const rotulosCurtos = {
+                    "BOEHRINGER": "BOEHRINGER", "PREMIER": "PREMIER", "OURO FINO": "OURO FINO", 
+                    "ORGANACT PET": "ORGANACT", "AVERT": "AVERT", "VANSIL": "VANSIL", 
+                    "MUNDO ANIMAL": "M. ANIMAL", "FARMINA": "FARMINA", "CONSOLIDADO": "TOTAL GERAL"
+                };
+                
+                canaisComparacao.forEach(idC => {
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]}</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.</th>`;
+                });
+                theadTr.innerHTML = theadHtml;
+
+                let dadosCanais = {};
+                canaisComparacao.forEach(idC => {
+                    dadosCanais[idC] = calcularDadosCanalParaAno(idC, anoFiltroLadoALado).acumuladoAno;
+                });
+
+                function adicionarLinhaLadoALado(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                    let tr = document.createElement('tr');
+                    if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
+                    else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
+                    else tr.className = 'hover:bg-slate-50/80 transition';
+
+                    let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
+                    canaisComparacao.forEach(idC => {
+                        let acumuladoAno = dadosCanais[idC];
+                        let valAcum = seletorValor(acumuladoAno);
+                        let baseAcumAV = acumuladoAno.receita_liquida !== 0 ? acumuladoAno.receita_liquida : 1;
+                        let avAcum = (valAcum / baseAcumAV) * 100;
+                        let valAcumExibicao = forcarParenteses && valAcum > 0 ? -valAcum : valAcum;
+
+                        html += `
+                            <td class="py-2.5 px-2 text-right border-l border-slate-200">${formatarMoeda(valAcumExibicao, isHeader || isSubtotal)}</td>
+                            <td class="py-2.5 px-2 text-right text-slate-500">${formatarPercentual(avAcum, isHeader || isSubtotal)}</td>
+                        `;
+                    });
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                }
+
+                adicionarLinhaLadoALado("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
+                adicionarLinhaLadoALado("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
+                adicionarLinhaLadoALado("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaLadoALado("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaLadoALado("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaLadoALado("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaLadoALado("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaLadoALado("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaLadoALado("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
+                adicionarLinhaLadoALado("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
+                adicionarLinhaLadoALado("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
+                adicionarLinhaLadoALado("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
+                adicionarLinhaLadoALado("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaLadoALado("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
+
+            } else if (filtroAnoAtivo !== "TODOS") {
+                // VISÃO DE UM ANO ESPECÍFICO SELECIONADO NO FILTRO PARA UM FORNECEDOR ESPECÍFICO
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${filtroAnoAtivo})`;
+                subTitulo.innerText = `Visão Individualizada do Exercício ${filtroAnoAtivo}`;
+                badgeContainer.innerText = `Base A.V.: Receita Líquida de ${filtroAnoAtivo} (100%)`;
+
+                theadTr.innerHTML = `
+                    <th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">Valor Anual (${filtroAnoAtivo})</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">A.V. (%)</th>
+                `;
+
+                let dadosAno = calcularDadosCanalParaAno(canalAtivo, filtroAnoAtivo).acumuladoAno;
+                let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
+
+                function adicionarLinhaUnica(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                    let tr = document.createElement('tr');
+                    if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
+                    else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
+                    else tr.className = 'hover:bg-slate-50/80 transition';
+
+                    let val = seletorValor(dadosAno);
+                    let av = (val / baseAV) * 100;
+                    let valExibicao = forcarParenteses && val > 0 ? -val : val;
+
+                    tr.innerHTML = `
+                        <td class="px-4 py-2.5 coluna-fixa">${nome}</td>
+                        <td class="py-2.5 px-4 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                        <td class="py-2.5 px-4 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+
+                adicionarLinhaUnica("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
+                adicionarLinhaUnica("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
+                adicionarLinhaUnica("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaUnica("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaUnica("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaUnica("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaUnica("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaUnica("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaUnica("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
+                adicionarLinhaUnica("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
+                adicionarLinhaUnica("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
+                adicionarLinhaUnica("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
+                adicionarLinhaUnica("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
+                adicionarLinhaUnica("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaUnica("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaUnica("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
+
+            } else {
+                // VISÃO ANO A ANO PADRÃO PARA FORNECEDOR ESPECÍFICO (TODOS OS ANOS LADO A LADO)
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
+                subTitulo.innerText = "Visão Comparativa Ano a Ano com Análise Vertical (%)";
+                badgeContainer.innerText = "Base A.V.: Receita Líquida do respectivo ano (100%)";
+
+                let theadHtml = '<th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
+                anosLista.forEach(ano => {
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${ano}</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V. (%)</th>`;
+                });
+                theadTr.innerHTML = theadHtml;
+
+                let dadosAnosObj = {};
+                anosLista.forEach(ano => {
+                    dadosAnosObj[ano] = calcularDadosCanalParaAno(canalAtivo, ano).acumuladoAno;
+                });
+
+                function adicionarLinhaAnoAno(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                    let tr = document.createElement('tr');
+                    if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
+                    else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
+                    else tr.className = 'hover:bg-slate-50/80 transition';
+
+                    let html = `<td class="px-4 py-2.5 coluna-fixa">${nome}</td>`;
+                    anosLista.forEach(ano => {
+                        let dadosAno = dadosAnosObj[ano];
+                        let val = seletorValor(dadosAno);
+                        let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
+                        let av = (val / baseAV) * 100;
+                        let valExibicao = forcarParenteses && val > 0 ? -val : val;
+
+                        html += `
+                            <td class="py-2.5 px-2 text-right border-l border-slate-200">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                            <td class="py-2.5 px-2 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                        `;
+                    });
+                    tr.innerHTML = html;
+                    tbody.appendChild(tr);
+                }
+
+                adicionarLinhaAnoAno("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
+                adicionarLinhaAnoAno("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
+                adicionarLinhaAnoAno("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaAnoAno("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaAnoAno("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaAnoAno("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaAnoAno("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaAnoAno("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaAnoAno("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
+                adicionarLinhaAnoAno("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
+                adicionarLinhaAnoAno("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
+                adicionarLinhaAnoAno("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
+                adicionarLinhaAnoAno("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
+                adicionarLinhaAnoAno("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaAnoAno("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaAnoAno("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
+            }
         }
 
         function exportarExcel() {
-            let tabela = document.getElementById("tabelaDRE");
-            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE por Canal" });
-            XLSX.writeFile(wb, "DRE_Gerencial_Por_Canal.xlsx");
+            let tabela = document.getElementById("tabela-dre-dados");
+            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE" });
+            XLSX.writeFile(wb, `DRE_${canalAtivo}_${filtroAnoAtivo}.xlsx`);
         }
 
-        function abrirModalConfig() {
-            document.getElementById('supabaseUrlInput').value = supabaseUrl;
-            document.getElementById('supabaseKeyInput').value = supabaseKey;
-            document.getElementById('modalConfig').classList.remove('hidden');
-        }
-
-        function fecharModalConfig() {
-            document.getElementById('modalConfig').classList.add('hidden');
-        }
-
-        function salvarConfigSupabase() {
-            supabaseUrl = document.getElementById('supabaseUrlInput').value.trim();
-            supabaseKey = document.getElementById('supabaseKeyInput').value.trim();
-            localStorage.setItem('supabase_url', supabaseUrl);
-            localStorage.setItem('supabase_key', supabaseKey);
-            fecharModalConfig();
-            if (supabaseUrl && supabaseKey) {
-                try {
-                    supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                    atualizarStatusNuvem(true, "Conectado");
-                    alert("Configuração salva com sucesso!");
-                } catch (e) {
-                    alert("Erro ao conectar ao Supabase: " + e.message);
-                }
-            } else {
-                supabaseClient = null;
-                atualizarStatusNuvem(false, "Modo Local");
-            }
-        }
-
-        function abrirModalGerenciar() {
-            renderizarContasDREModal();
-            renderizarFornecedoresModal();
-            document.getElementById('modalGerenciar').classList.remove('hidden');
-        }
-
-        function fecharModalGerenciar() {
-            document.getElementById('modalGerenciar').classList.add('hidden');
-        }
-
-        function mudarAbaModal(aba) {
-            if (aba === 'dre') {
-                document.getElementById('btnAbaDRE').className = "pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition";
-                document.getElementById('btnAbaFornecedores').className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition";
-                document.getElementById('conteudoAbaDRE').classList.remove('hidden');
-                document.getElementById('conteudoAbaFornecedores').classList.add('hidden');
-            } else {
-                document.getElementById('btnAbaFornecedores').className = "pb-2 border-b-2 border-indigo-600 text-indigo-600 font-semibold text-sm transition";
-                document.getElementById('btnAbaDRE').className = "pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 font-semibold text-sm transition";
-                document.getElementById('conteudoAbaFornecedores').classList.remove('hidden');
-                document.getElementById('conteudoAbaDRE').classList.add('hidden');
-            }
-        }
-
-        function renderizarContasDREModal() {
-            let html = "";
-            dadosDRE.contas.forEach((conta, index) => {
-                html += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-2">`;
-                html += `<div class="flex items-center justify-between gap-2">`;
-                html += `<input type="text" value="${conta.nome}" onchange="dadosDRE.contas[${index}].nome = this.value" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm font-medium w-full max-w-xs">`;
-                html += `<div class="flex items-center gap-2 text-xs text-slate-500">`;
-                html += `<span>Tipo: <b>${conta.tipo}</b></span>`;
-                if (!conta.calculo) {
-                    html += `<button onclick="removerContaDRE(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>`;
-                } else {
-                    html += `<span class="italic text-slate-400">(Calculado)</span>`;
-                }
-                html += `</div></div>`;
-                
-                if (!conta.calculo) {
-                    html += `<div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-200">`;
-                    dadosDRE.canais.forEach(canal => {
-                        html += `<div class="bg-white p-2 rounded-lg border border-slate-200"><span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${canal}</span>`;
-                        dadosDRE.anos.forEach(ano => {
-                            let val = (conta.valores && conta.valores[canal] && conta.valores[canal][ano]) ? conta.valores[canal][ano] : 0;
-                            html += `<div class="flex items-center justify-between gap-1 mb-1"><span class="text-xs text-slate-500">${ano}:</span>`;
-                            html += `<input type="number" value="${val}" onchange="atualizarValorConta(${index}, '${canal}', ${ano}, this.value)" class="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs w-28 text-right"></div>`;
-                        });
-                        html += `</div>`;
-                    });
-                    html += `</div>`;
-                }
-                html += `</div>`;
-            });
-            document.getElementById('listaContasDREModal').innerHTML = html;
-        }
-
-        function adicionarLinhaDRE() {
-            let nome = prompt("Nome da nova conta (ex: Outras Receitas):");
-            if (!nome) return;
-            let valoresVazios = {};
-            dadosDRE.canais.forEach(c => {
-                valoresVazios[c] = {};
-                dadosDRE.anos.forEach(a => valoresVazios[c][a] = 0);
-            });
-            dadosDRE.contas.push({ nome: nome, tipo: "receita", valores: valoresVazios });
-            renderizarContasDREModal();
-        }
-
-        function removerContaDRE(index) {
-            if (confirm("Deseja realmente remover esta conta?")) {
-                dadosDRE.contas.splice(index, 1);
-                renderizarContasDREModal();
-            }
-        }
-
-        function atualizarValorConta(indexConta, canal, ano, valor) {
-            if (!dadosDRE.contas[indexConta].valores) dadosDRE.contas[indexConta].valores = {};
-            if (!dadosDRE.contas[indexConta].valores[canal]) dadosDRE.contas[indexConta].valores[canal] = {};
-            dadosDRE.contas[indexConta].valores[canal][ano] = parseFloat(valor) || 0;
-        }
-
-        function renderizarFornecedoresModal() {
-            let html = "";
-            dadosDRE.fornecedores.forEach((forn, index) => {
-                html += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">`;
-                html += `<input type="text" value="${forn.nome}" onchange="dadosDRE.fornecedores[${index}].nome = this.value" placeholder="Nome do Fornecedor" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm flex-1 min-w-[200px]">`;
-                html += `<select onchange="dadosDRE.fornecedores[${index}].canal = this.value" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm">`;
-                dadosDRE.canais.forEach(c => {
-                    html += `<option value="${c}" ${forn.canal === c ? 'selected' : ''}>${c}</option>`;
-                });
-                html += `</select>`;
-                html += `<select onchange="dadosDRE.fornecedores[${index}].ano = parseInt(this.value)" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm">`;
-                dadosDRE.anos.forEach(a => {
-                    html += `<option value="${a}" ${forn.ano === a ? 'selected' : ''}>${a}</option>`;
-                });
-                html += `</select>`;
-                html += `<input type="number" value="${forn.valor}" onchange="dadosDRE.fornecedores[${index}].valor = parseFloat(this.value) || 0" placeholder="Valor" class="bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-sm w-32 text-right">`;
-                html += `<button onclick="removerFornecedorModal(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>`;
-                html += `</div>`;
-            });
-            document.getElementById('listaFornecedoresModal').innerHTML = html;
-        }
-
-        function adicionarFornecedorModal() {
-            dadosDRE.fornecedores.push({ nome: "Novo Fornecedor", canal: dadosDRE.canais[0], ano: dadosDRE.anos[0], valor: 0 });
-            renderizarFornecedoresModal();
-        }
-
-        function removerFornecedorModal(index) {
-            dadosDRE.fornecedores.splice(index, 1);
-            renderizarFornecedoresModal();
-        }
-
-        function salvarAlteracoesModal() {
-            popularFiltros();
-            renderizarDRE();
-            fecharModalGerenciar();
-            salvarDadosNaNuvem();
+        function exportarPDF() {
+            const elemento = document.getElementById("dre-container-export");
+            const opt = {
+                margin:       10,
+                filename:     `DRE_${canalAtivo}_${filtroAnoAtivo}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().from(elemento).set(opt).save();
         }
     </script>
 </body>
