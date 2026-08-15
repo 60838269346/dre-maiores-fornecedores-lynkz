@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRE por Canal - Visão Ano a Ano</title>
+    <title>DRE por Canal - Visão Ano a Ano e Filtro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
@@ -28,7 +28,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">DRE Individualizada por Fornecedor</h1>
-                    <p class="text-xs text-slate-400">Visão Anual Comparativa (Ano a Ano) e Acumulado</p>
+                    <p class="text-xs text-slate-400">Visão Anual Comparativa e Filtro por Exercício</p>
                 </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
@@ -54,13 +54,23 @@
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Selecione o Fornecedor</h3>
                 <div id="canais-botoes" class="flex flex-wrap gap-2"></div>
             </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Exercício (Ano / Visão)</label>
+                <select id="filtro-ano" onchange="atualizarAnoFiltro()" class="border border-slate-300 rounded-lg p-2 text-xs font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
+                    <option value="TODOS">📊 Visão Ano a Ano (Todos)</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
         </div>
 
         <div id="dre-container-export" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50/50 gap-2">
                 <div>
                     <h2 id="titulo-dre-canal" class="font-bold text-slate-800 text-base">DRE - Fornecedor</h2>
-                    <p class="text-xs text-slate-500">Visão Comparativa Ano a Ano com Análise Vertical (%)</p>
+                    <p id="subtitulo-dre" class="text-xs text-slate-500">Visão Comparativa Ano a Ano com Análise Vertical (%)</p>
                 </div>
                 <div id="badge-av-container" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
                     Base A.V.: Receita Líquida do respectivo ano (100%)
@@ -177,6 +187,7 @@
         ];
 
         let canalAtivo = "BOEHRINGER";
+        let filtroAnoAtivo = "TODOS";
         let anosLista = ["2023", "2024", "2025", "2026"];
         let lancamentos = [];
 
@@ -308,6 +319,11 @@
             });
         }
 
+        function atualizarAnoFiltro() {
+            filtroAnoAtivo = document.getElementById('filtro-ano').value;
+            calcularEAtualizarDRE();
+        }
+
         function toggleAdminModal() {
             const modal = document.getElementById('admin-modal');
             modal.classList.toggle('hidden');
@@ -425,14 +441,18 @@
 
         function calcularEAtualizarDRE() {
             const objCanalAtivo = canais.find(c => c.id === canalAtivo) || canais[0];
-            document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
-
             const theadTr = document.getElementById('dre-thead-tr');
             const tbody = document.getElementById('dre-table-body');
             tbody.innerHTML = '';
 
+            const badgeContainer = document.getElementById('badge-av-container');
+            const subTitulo = document.getElementById('subtitulo-dre');
+
             if (canalAtivo === "CONSOLIDADO_LADO_A_LADO") {
-                // Mantém consolidado lado a lado de fornecedores se desejado
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - Visão Consolidada Lado a Lado`;
+                subTitulo.innerText = "Comparativo entre todos os fornecedores (2026)";
+                badgeContainer.innerText = "Visão Lado a Lado por Fornecedor";
+
                 let theadHtml = '<th class="py-3 px-4 min-w-[240px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
                 const canaisComparacao = [
                     "BOEHRINGER", "PREMIER", "OURO FINO", "ORGANACT PET", 
@@ -445,7 +465,7 @@
                 };
                 
                 canaisComparacao.forEach(idC => {
-                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]} (2026)</th>`;
+                    theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${rotulosCurtos[idC]}</th>`;
                     theadHtml += `<th class="py-3 px-2 text-right font-bold bg-slate-100">A.V.</th>`;
                 });
                 theadTr.innerHTML = theadHtml;
@@ -495,8 +515,62 @@
                 adicionarLinhaLadoALado("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
                 adicionarLinhaLadoALado("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
 
+            } else if (filtroAnoAtivo !== "TODOS") {
+                // VISÃO DE UM ANO ESPECÍFICO SELECIONADO NO FILTRO
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (${filtroAnoAtivo})`;
+                subTitulo.innerText = `Visão Individualizada do Exercício ${filtroAnoAtivo}`;
+                badgeContainer.innerText = `Base A.V.: Receita Líquida de ${filtroAnoAtivo} (100%)`;
+
+                theadTr.innerHTML = `
+                    <th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">Valor Anual (${filtroAnoAtivo})</th>
+                    <th class="py-3 px-4 text-right bg-slate-100">A.V. (%)</th>
+                `;
+
+                let dadosAno = calcularDadosCanalParaAno(canalAtivo, filtroAnoAtivo).acumuladoAno;
+                let baseAV = dadosAno.receita_liquida !== 0 ? dadosAno.receita_liquida : 1;
+
+                function adicionarLinhaUnica(nome, seletorValor, isHeader = false, isSubtotal = false, forcarParenteses = false) {
+                    let tr = document.createElement('tr');
+                    if (isHeader) tr.className = 'bg-slate-100 font-bold text-slate-900';
+                    else if (isSubtotal) tr.className = 'bg-slate-50 font-semibold text-slate-800 border-t border-b border-slate-200';
+                    else tr.className = 'hover:bg-slate-50/80 transition';
+
+                    let val = seletorValor(dadosAno);
+                    let av = (val / baseAV) * 100;
+                    let valExibicao = forcarParenteses && val > 0 ? -val : val;
+
+                    tr.innerHTML = `
+                        <td class="px-4 py-2.5 coluna-fixa">${nome}</td>
+                        <td class="py-2.5 px-4 text-right">${formatarMoeda(valExibicao, isHeader || isSubtotal)}</td>
+                        <td class="py-2.5 px-4 text-right text-slate-500">${formatarPercentual(av, isHeader || isSubtotal)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+
+                adicionarLinhaUnica("1. Receita Bruta (Vendas)", dm => dm.receita_bruta, true, false);
+                adicionarLinhaUnica("(-) Dedução da Receita Bruta", dm => dm.deducao_receita, false, false, true);
+                adicionarLinhaUnica("(-) Impostos sobre Vendas", dm => dm.impostos, false, false, true);
+                adicionarLinhaUnica("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
+                adicionarLinhaUnica("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaUnica("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
+                adicionarLinhaUnica("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
+                adicionarLinhaUnica("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
+                adicionarLinhaUnica("(-) Comissões sobre Vendas", dm => dm.comissoes, false, false, true);
+                adicionarLinhaUnica("(-) Gastos com Pessoal", dm => dm.pessoal, false, false, true);
+                adicionarLinhaUnica("(-) Despesas Comerciais", dm => dm.comercial, false, false, true);
+                adicionarLinhaUnica("(-) Despesas com Pessoal Direta", dm => dm.pessoal_direta, false, false, true);
+                adicionarLinhaUnica("(=) Total das Despesas Operacionais", dm => dm.total_desp, false, true, true);
+                adicionarLinhaUnica("(=) EBITDA", dm => dm.ebitda, false, true);
+                adicionarLinhaUnica("(-) Despesas Corporativas Indiretas", dm => dm.corporativas_indiretas, false, false, true);
+                adicionarLinhaUnica("(=) EBITDA Ajustado", dm => dm.ebitda_ajustado, true, true);
+
             } else {
-                // VISÃO ANO A ANO (2023, 2024, 2025, 2026 lado a lado) para o fornecedor ativo
+                // VISÃO ANO A ANO PADRÃO (TODOS OS ANOS LADO A LADO)
+                document.getElementById('titulo-dre-canal').innerText = `DRE Detalhada - ${objCanalAtivo.nome} (Visão Ano a Ano)`;
+                subTitulo.innerText = "Visão Comparativa Ano a Ano com Análise Vertical (%)";
+                badgeContainer.innerText = "Base A.V.: Receita Líquida do respectivo ano (100%)";
+
                 let theadHtml = '<th class="py-3 px-4 min-w-[280px] coluna-fixa bg-slate-100">Estrutura da DRE</th>';
                 anosLista.forEach(ano => {
                     theadHtml += `<th class="py-3 px-2 text-right border-l border-slate-300 font-bold bg-slate-100">${ano}</th>`;
@@ -553,15 +627,15 @@
 
         function exportarExcel() {
             let tabela = document.getElementById("tabela-dre-dados");
-            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE Ano a Ano" });
-            XLSX.writeFile(wb, `DRE_${canalAtivo}_Ano_a_Ano.xlsx`);
+            let wb = XLSX.utils.table_to_book(tabela, { sheet: "DRE" });
+            XLSX.writeFile(wb, `DRE_${canalAtivo}_${filtroAnoAtivo}.xlsx`);
         }
 
         function exportarPDF() {
             const elemento = document.getElementById("dre-container-export");
             const opt = {
                 margin:       10,
-                filename:     `DRE_${canalAtivo}_Ano_a_Ano.pdf`,
+                filename:     `DRE_${canalAtivo}_${filtroAnoAtivo}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
