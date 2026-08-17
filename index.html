@@ -130,6 +130,8 @@
                                 <option value="receita_intercompany">(+) Receita Intercompany</option>
                                 <option value="ajuste_intercompany">(-) Ajuste Intercompany</option>
                                 <option value="cmv">(-) CMV (Custo das Mercadorias)</option>
+                                <option value="bonificacoes_concedidas">(-) Bonificações Concedidas</option>
+                                <option value="bonificacoes_recebidas">(+) Bonificações Recebidas</option>
                                 <option value="verbas_comerciais">(+) Verbas Comerciais</option>
                                 <option value="comissoes">(-) Comissões sobre Vendas</option>
                                 <option value="pessoal">(-) Gastos com Pessoal</option>
@@ -420,7 +422,8 @@
             let acumuladoAno = {
                 receita_bruta: 0, deducao_receita: 0, impostos: 0, 
                 receita_intercompany: 0, ajuste_intercompany: 0, receita_liquida: 0,
-                cmv: 0, lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
+                cmv: 0, bonificacoes_concedidas: 0, bonificacoes_recebidas: 0, 
+                lucro_bruto: 0, verbas_comerciais: 0, lucro_bruto_ajustado: 0,
                 comissoes: 0, pessoal: 0, comercial: 0, pessoal_direta: 0,
                 total_desp: 0, ebitda: 0, corporativas_indiretas: 0, ebitda_ajustado: 0
             };
@@ -433,7 +436,7 @@
             });
 
             acumuladoAno.receita_liquida = acumuladoAno.receita_bruta - acumuladoAno.deducao_receita - acumuladoAno.impostos + acumuladoAno.receita_intercompany - acumuladoAno.ajuste_intercompany;
-            acumuladoAno.lucro_bruto = acumuladoAno.receita_liquida - acumuladoAno.cmv;
+            acumuladoAno.lucro_bruto = acumuladoAno.receita_liquida - acumuladoAno.cmv - acumuladoAno.bonificacoes_concedidas + acumuladoAno.bonificacoes_recebidas;
             acumuladoAno.lucro_bruto_ajustado = acumuladoAno.lucro_bruto + acumuladoAno.verbas_comerciais;
             acumuladoAno.total_desp = acumuladoAno.comissoes + acumuladoAno.pessoal + acumuladoAno.comercial + acumuladoAno.pessoal_direta;
             acumuladoAno.ebitda = acumuladoAno.lucro_bruto_ajustado - acumuladoAno.total_desp;
@@ -510,6 +513,8 @@
                 adicionarLinhaLadoALado("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaLadoALado("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaLadoALado("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaLadoALado("(-) Bonificações Concedidas", dm => dm.bonificacoes_concedidas, false, false, true);
+                adicionarLinhaLadoALado("(+) Bonificações Recebidas", dm => dm.bonificacoes_recebidas, false, false, false);
                 adicionarLinhaLadoALado("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
                 adicionarLinhaLadoALado("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaLadoALado("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
@@ -561,6 +566,8 @@
                 adicionarLinhaUnica("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaUnica("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaUnica("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaUnica("(-) Bonificações Concedidas", dm => dm.bonificacoes_concedidas, false, false, true);
+                adicionarLinhaUnica("(+) Bonificações Recebidas", dm => dm.bonificacoes_recebidas, false, false, false);
                 adicionarLinhaUnica("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
                 adicionarLinhaUnica("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaUnica("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
@@ -620,6 +627,8 @@
                 adicionarLinhaAnoAno("(-) Ajuste Intercompany", dm => dm.ajuste_intercompany, false, false, true);
                 adicionarLinhaAnoAno("(=) Receita Líquida", dm => dm.receita_liquida, false, true);
                 adicionarLinhaAnoAno("(-) CMV (Custo das Mercadorias)", dm => dm.cmv, false, false, true);
+                adicionarLinhaAnoAno("(-) Bonificações Concedidas", dm => dm.bonificacoes_concedidas, false, false, true);
+                adicionarLinhaAnoAno("(+) Bonificações Recebidas", dm => dm.bonificacoes_recebidas, false, false, false);
                 adicionarLinhaAnoAno("(=) Lucro Bruto", dm => dm.lucro_bruto, false, true);
                 adicionarLinhaAnoAno("(+) Verbas Comerciais", dm => dm.verbas_comerciais, false, false);
                 adicionarLinhaAnoAno("(=) Lucro Bruto Ajustado", dm => dm.lucro_bruto_ajustado, false, true);
@@ -654,4 +663,3 @@
     </script>
 </body>
 </html>
-   
